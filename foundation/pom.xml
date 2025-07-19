@@ -10,7 +10,7 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>spring-backend</artifactId>
+	<artifactId>foundation</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>foundation</name>
 	<description>Demo project for Spring Boot</description>
@@ -60,6 +60,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.firebase</groupId>
+			<artifactId>firebase-admin</artifactId>
+			<version>9.2.0</version> <!-- or latest stable -->
 		</dependency>
 	</dependencies>
 
