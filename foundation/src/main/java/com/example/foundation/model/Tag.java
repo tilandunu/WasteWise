@@ -8,51 +8,16 @@ public class Tag {
 
     @Id
     private String id;
+    private String tagId; // e.g., QR code or unique identifier
+    private boolean active = true; // initially active
 
-    private String tagId;   // e.g., QR code or RFID unique ID
-    private String tagType; // e.g., "QR_CODE", "RFID", "SENSOR"
-    private boolean active = true;
+    // --- Getters & Setters ---
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-    // Constructors
-    public Tag() {}
+    public String getTagId() { return tagId; }
+    public void setTagId(String tagId) { this.tagId = tagId; }
 
-    public Tag(String tagId, String tagType) {
-        this.tagId = tagId;
-        this.tagType = tagType;
-        this.active = true;
-    }
-
-    // --- Getters ---
-    public String getId() {
-        return id;
-    }
-
-    public String getTagId() {
-        return tagId;
-    }
-
-    public String getTagType() {
-        return tagType;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    // --- Setters ---
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setTagId(String tagId) {
-        this.tagId = tagId;
-    }
-
-    public void setTagType(String tagType) {
-        this.tagType = tagType;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
 }

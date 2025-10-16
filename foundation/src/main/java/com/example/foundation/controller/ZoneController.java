@@ -1,10 +1,11 @@
 package com.example.foundation.controller;
 
-import com.example.foundation.dto.request.ZoneRequest;
 import com.example.foundation.model.Zone;
 import com.example.foundation.service.ZoneService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/zones")
@@ -16,13 +17,31 @@ public class ZoneController {
         this.zoneService = zoneService;
     }
 
+    // Create a new zone
     @PostMapping("/create")
-    public ResponseEntity<?> createZone(@RequestBody ZoneRequest request) {
-        if (request.getName() == null || request.getName().isEmpty()) {
-            return ResponseEntity.badRequest().body("Zone name is required");
+    public ResponseEntity<?> createZone(@RequestBody Zone zoneRequest) {
+        try {
+            Zone zone = zoneService.createZone(zoneRequest.getName());
+            return ResponseEntity.ok(zone);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
 
-        Zone zone = zoneService.createZone(request.getName());
-        return ResponseEntity.ok(zone);
+    // Get all zones
+    @GetMapping("/all")
+    public ResponseEntity<List<Zone>> getAllZones() {
+        return ResponseEntity.ok(zoneService.getAllZones());
+    }
+
+    // Get a zone by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getZoneById(@PathVariable String id) {
+        try {
+            Zone zone = zoneService.getZoneById(id);
+            return ResponseEntity.ok(zone);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

@@ -2,35 +2,35 @@ package com.example.foundation.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.time.Instant;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
 @Document(collection = "users")
-public class User {
-
-    public enum Role {
-        RESIDENT,
-        ADMIN,
-        OFFICER,
-        CREW,
-        PLANNER
-    }
+public abstract class User {
 
     @Id
     private String id;
 
-    private String uid;         // Firebase UID
-    private String email;
-    private String name;
-    private String picture;
+    private String username;
+    private String password;
+    private String address;
+    private String contactNumber;
+    private boolean activated = false; // initially false
 
-    private Role role = Role.RESIDENT;
+    @DBRef
+    private Zone zone;
 
-    private Instant createdAt = Instant.now();
-    private Instant updatedAt = Instant.now();
+    @DBRef
+    private Bin bin; // can be null initially
+
+    public User(String username, String password, String address, String contactNumber) {
+        this.username = username;
+        this.password = password;
+        this.address = address;
+        this.contactNumber = contactNumber;
+
+    }
 
     // --- Getters & Setters ---
-
     public String getId() {
         return id;
     }
@@ -39,59 +39,59 @@ public class User {
         this.id = id;
     }
 
-    public String getUid() {
-        return uid;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUid(String uid) {
-        this.uid = uid;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getEmail() {
-        return email;
+    public String getPassword() {
+        return password;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public String getName() {
-        return name;
+    public String getAddress() {
+        return address;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
-    public String getPicture() {
-        return picture;
+    public String getContactNumber() {
+        return contactNumber;
     }
 
-    public void setPicture(String picture) {
-        this.picture = picture;
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
     }
 
-    public Role getRole() {
-        return role;
+    public boolean isActivated() {
+        return activated;
     }
 
-    public void setRole(Role role) {
-        this.role = role;
+    public void setActivated(boolean activated) {
+        this.activated = activated;
     }
 
-    public Instant getCreatedAt() {
-        return createdAt;
+    public Zone getZone() {
+        return zone;
     }
 
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
+    public void setZone(Zone zone) {
+        this.zone = zone;
     }
 
-    public Instant getUpdatedAt() {
-        return updatedAt;
+    public Bin getBin() {
+        return bin;
     }
 
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
+    public void setBin(Bin bin) {
+        this.bin = bin;
     }
 }
