@@ -5,6 +5,8 @@ import com.example.foundation.model.Resident;
 import com.example.foundation.model.Zone;
 import com.example.foundation.repository.UserRepository;
 import com.example.foundation.repository.ZoneRepository;
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +22,6 @@ public class UserController {
         this.zoneRepository = zoneRepository;
     }
 
-    // --- Register ---
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterUserRequest request) {
 
@@ -32,15 +33,24 @@ public class UserController {
         Zone zone = zoneRepository.findById(request.getZoneId())
                 .orElseThrow(() -> new RuntimeException("Zone not found"));
 
+        // Create Resident
         Resident newUser = new Resident(
                 request.getUsername(),
                 request.getPassword(),
                 request.getAddress(),
-                request.getContactNumber()
-        );
+                request.getContactNumber());
 
         newUser.setZone(zone);
-        newUser.setActivated(false); // initially false
+        newUser.setActivated(false);
+
+        // Set Premises Type
+        if (request.getPremisesType() != null) {
+            try {
+                newUser.setPremisesType(Resident.PremisesType.valueOf(request.getPremisesType().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body("Invalid premises type");
+            }
+        }
 
         userRepository.save(newUser);
 
@@ -52,14 +62,27 @@ public class UserController {
     public ResponseEntity<?> login(@RequestBody Resident loginRequest) {
         var userOpt = userRepository.findByUsername(loginRequest.getUsername());
 
-        if (userOpt.isEmpty()) return ResponseEntity.status(401).body("User not found");
+        if (userOpt.isEmpty())
+            return ResponseEntity.status(401).body("User not found");
 
         var user = userOpt.get();
         if (!user.getPassword().equals(loginRequest.getPassword()))
             return ResponseEntity.status(401).body("Invalid credentials");
 
-        // if (!user.isActivated()) return ResponseEntity.status(403).body("User not activated");
+        // if (!user.isActivated()) return ResponseEntity.status(403).body("User not
+        // activated");
 
         return ResponseEntity.ok(user);
     }
+
+    // Get all users of type Resident
+    @GetMapping("/all")
+    public ResponseEntity<List<Resident>> getAllUsers() {
+        List<Resident> residents = userRepository.findAll().stream()
+                .filter(user -> user instanceof Resident)
+                .map(user -> (Resident) user)
+                .toList(); // Java 16+; use Collectors.toList() if older
+        return ResponseEntity.ok(residents);
+    }
+
 }
