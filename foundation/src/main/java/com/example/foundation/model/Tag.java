@@ -19,6 +19,18 @@ public class Tag {
         this.tagId = tagId;
         this.tagType = tagType;
     }
+    public boolean isActive() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'isActive'");
+    }
+    public void setActive(boolean b) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setActive'");
+    }
+    public String getTagId() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getTagId'");
+    }
 
     // Getters & Setters
     // ...
