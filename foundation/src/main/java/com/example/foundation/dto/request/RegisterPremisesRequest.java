@@ -7,28 +7,59 @@ public class RegisterPremisesRequest {
     private String contactNumber;
     private String zoneId;
     private String ownerUid; // from Firebase user
-    private String binType;  // e.g., "General", "Recyclable"
-    private String tagId;    // scanned or manually entered tag
+    private String binId; // e.g., "General", "Recyclable"
+    private String tagId; // scanned or manually entered tag
 
     // Getters & Setters
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public String getAddress() {
+        return address;
+    }
 
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-    public String getContactNumber() { return contactNumber; }
-    public void setContactNumber(String contactNumber) { this.contactNumber = contactNumber; }
+    public String getType() {
+        return type;
+    }
 
-    public String getZoneId() { return zoneId; }
-    public void setZoneId(String zoneId) { this.zoneId = zoneId; }
+    public void setType(String type) {
+        this.type = type;
+    }
 
-    public String getOwnerUid() { return ownerUid; }
-    public void setOwnerUid(String ownerUid) { this.ownerUid = ownerUid; }
+    public String getContactNumber() {
+        return contactNumber;
+    }
 
-    public String getBinType() { return binType; }
-    public void setBinType(String binType) { this.binType = binType; }
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
+    }
 
-    public String getTagId() { return tagId; }
-    public void setTagId(String tagId) { this.tagId = tagId; }
+    public String getZoneId() {
+        return zoneId;
+    }
+
+    public void setZoneId(String zoneId) {
+        this.zoneId = zoneId;
+    }
+
+    public String getOwnerUid() {
+        return ownerUid;
+    }
+
+    public void setOwnerUid(String ownerUid) {
+        this.ownerUid = ownerUid;
+    }
+
+    public String getTagId() {
+        return tagId;
+    }
+
+    public void setTagId(String tagId) {
+        this.tagId = tagId;
+    }
+
+    public String getBinCode() {
+        return binId;
+    }
 }

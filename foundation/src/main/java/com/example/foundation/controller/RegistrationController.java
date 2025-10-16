@@ -41,9 +41,9 @@ public class RegistrationController {
         }
 
         // 3️⃣ Check if user is authorized officer/admin
-        if (user.getRole() != User.Role.OFFICER) {
-            return ResponseEntity.status(403).body("Unauthorized: Only officers can register premises");
-        }
+        // if (user.getRole() != User.Role.OFFICER) {
+        //     return ResponseEntity.status(403).body("Unauthorized: Only officers can register premises");
+        // }
 
         // 4️⃣ Delegate to service
         try {

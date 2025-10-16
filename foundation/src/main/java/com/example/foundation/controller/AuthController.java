@@ -5,6 +5,7 @@ import com.example.foundation.model.User;
 import com.example.foundation.service.AuthService;
 import com.google.firebase.auth.FirebaseAuthException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,7 +43,7 @@ public class AuthController {
     }
 
     //Get all users
-    @PostMapping("/users")
+    @GetMapping("/users")
     public ResponseEntity<?> getAllUsers() {
         return ResponseEntity.ok().body(authService.getAllUsers());
     }

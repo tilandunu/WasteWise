@@ -15,19 +15,19 @@ const RegisterPremisesPage: React.FC = () => {
     address: "",
     type: "Household",
     contactNumber: "",
-    zoneId: "",
-    binType: "General",
+    zoneId: "68f1118b5aa47df7c3816c9c",
+    binId: "", // <-- replace binType with binId
     tagId: "",
   });
 
   const [loading, setLoading] = useState(false);
   const [responseMsg, setResponseMsg] = useState("");
 
-  // Simulate fetching zones (in real app call /api/zones)
+  // Simulate fetching zones (replace with API call if available)
   useEffect(() => {
     setZones([
-      { id: "1", name: "Colombo Central" },
-      { id: "2", name: "Colombo South" },
+      { id: "68f1118b5aa47df7c3816c9c", name: "Colombo Central" },
+      { id: "68f111915aa47df7c3816c9d", name: "Colombo South" },
     ]);
   }, []);
 
@@ -49,21 +49,33 @@ const RegisterPremisesPage: React.FC = () => {
     setResponseMsg("");
 
     try {
-      // Get Firebase token
       const token = await user.getIdToken();
+      const uid = user.uid; // Firebase UID
 
-      // Directly call backend with Authorization header
-      const res = await axios.post("/api/premises/register", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await axios.post(
+        "/api/premises/register",
+        {
+          ...formData,
+          ownerUid: uid, // Attach owner UID
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       setResponseMsg(`Premises registered! ID: ${res.data.premisesId}`);
+      setFormData({
+        address: "",
+        type: "Household",
+        contactNumber: "",
+        zoneId: zones[0]?.id || "",
+        binId: "",
+        tagId: "",
+      });
     } catch (err: any) {
       console.error("Axios error:", err);
-      console.log("Response data:", err.response?.data);
-      console.log("Status:", err.response?.status);
       setResponseMsg(err.response?.data || "Error registering premises");
     } finally {
       setLoading(false);
@@ -120,24 +132,23 @@ const RegisterPremisesPage: React.FC = () => {
           ))}
         </select>
 
-        <select
-          name="binType"
-          value={formData.binType}
+        <input
+          type="text"
+          name="binId"
+          placeholder="Bin ID"
+          value={formData.binId}
           onChange={handleChange}
           className="w-full p-2 border rounded"
-        >
-          <option value="General">General</option>
-          <option value="Recyclable">Recyclable</option>
-        </select>
+          required
+        />
 
         <input
           type="text"
           name="tagId"
-          placeholder="Tag ID (QR code)"
+          placeholder="Tag ID (optional)"
           value={formData.tagId}
           onChange={handleChange}
           className="w-full p-2 border rounded"
-          required
         />
 
         <button

@@ -9,29 +9,50 @@ public class Tag {
     @Id
     private String id;
 
-    private String tagId; // e.g., QR code or RFID unique ID
+    private String tagId;   // e.g., QR code or RFID unique ID
     private String tagType; // e.g., "QR_CODE", "RFID", "SENSOR"
     private boolean active = true;
 
     // Constructors
     public Tag() {}
+
     public Tag(String tagId, String tagType) {
         this.tagId = tagId;
         this.tagType = tagType;
-    }
-    public boolean isActive() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'isActive'");
-    }
-    public void setActive(boolean b) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setActive'");
-    }
-    public String getTagId() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTagId'");
+        this.active = true;
     }
 
-    // Getters & Setters
-    // ...
+    // --- Getters ---
+    public String getId() {
+        return id;
+    }
+
+    public String getTagId() {
+        return tagId;
+    }
+
+    public String getTagType() {
+        return tagType;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    // --- Setters ---
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setTagId(String tagId) {
+        this.tagId = tagId;
+    }
+
+    public void setTagType(String tagType) {
+        this.tagType = tagType;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 }

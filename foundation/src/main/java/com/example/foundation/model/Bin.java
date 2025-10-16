@@ -12,54 +12,84 @@ public class Bin {
 
     private String binCode; // internal ID or serial number
     private String type; // e.g., "General", "Recyclable"
-    private String status = "IN_STOCK"; // or "ASSIGNED", "DAMAGED"
+    private String status = "IN_STOCK"; // "IN_STOCK", "ASSIGNED", "DAMAGED"
 
     @DBRef
-    private Tag tag;
+    private Tag tag; // Can be null initially
 
     @DBRef
-    private Premises premises;
+    private Premises premises; // Can also be null initially
 
-    // Constructors
+    // --- Constructors ---
     public Bin() {}
 
-    public Bin(String binCode, String type, Tag tag, Premises premises) {
+    public Bin(String binCode, String type) {
         this.binCode = binCode;
         this.type = type;
-        this.tag = tag;
-        this.premises = premises;
+        this.status = "IN_STOCK";
+        this.tag = null; // initially no tag
+        this.premises = null; // initially not assigned
+    }
+
+    // --- Getters ---
+    public String getId() {
+        return id;
+    }
+
+    public String getBinCode() {
+        return binCode;
     }
 
     public String getType() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getType'");
-    }
-
-    public void setStatus(String string) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setStatus'");
-    }
-
-    public void setPremises(Premises premises2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setPremises'");
-    }
-
-    public void setTag(Tag tag2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setTag'");
-    }
-
-    public String getId() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getId'");
+        return type;
     }
 
     public String getStatus() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getStatus'");
+        return status;
     }
 
-    // Getters & Setters
-    // ...
+    public Tag getTagId() {
+        return tag;
+    }
+
+    public Premises getPremises() {
+        return premises;
+    }
+
+    // --- Setters ---
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setBinCode(String binCode) {
+        this.binCode = binCode;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setTag(Tag tag) {
+        this.tag = tag;
+    }
+
+    public void setPremises(Premises premises) {
+        this.premises = premises;
+    }
+
+    @Override
+    public String toString() {
+        return "Bin{" +
+                "id='" + id + '\'' +
+                ", binCode='" + binCode + '\'' +
+                ", type='" + type + '\'' +
+                ", status='" + status + '\'' +
+                ", tag=" + (tag != null ? tag.getId() : "null") +
+                ", premises=" + (premises != null ? premises.getId() : "null") +
+                '}';
+    }
 }

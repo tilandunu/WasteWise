@@ -7,4 +7,6 @@ import java.util.List;
 public interface BinRepository extends MongoRepository<Bin, String> {
     List<Bin> findByStatus(String status);
     List<Bin> findByPremisesId(String premisesId);
+    List<Bin> findByTagId(String tagId);
+    List<Bin> findByBinCode(String binCode);
 }

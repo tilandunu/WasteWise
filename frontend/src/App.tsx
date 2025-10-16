@@ -4,6 +4,8 @@ import SignInPage from "./pages/SignInPage";
 import UserDetails from "./pages/Home";
 import PaymentTest from "./components/PaymentTest";
 import RegisterPremisesPage from "./pages/RegisterPremisesPage";
+import AddZonePage from "./pages/AddZone";
+import AddBinPage from "./pages/AddBin";
 
 export default function App() {
   return (
@@ -18,12 +20,9 @@ export default function App() {
         }
       />
       <Route path="/paymentTest" element={<PaymentTest />} />
-      <Route
-        path="/register-premises"
-        element={
-            <RegisterPremisesPage />
-        }
-      />
+      <Route path="/register-premises" element={<RegisterPremisesPage />} />
+      <Route path="/add-zone" element={<AddZonePage />} />
+      <Route path="/add-bin" element={<AddBinPage />} />
     </Routes>
   );
 }

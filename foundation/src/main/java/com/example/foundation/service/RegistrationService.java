@@ -13,7 +13,6 @@ import com.example.foundation.repository.TagRepository;
 import com.example.foundation.repository.UserRepository;
 import com.example.foundation.repository.ZoneRepository;
 
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -39,22 +38,15 @@ public class RegistrationService {
         public PremisesResponse registerPremises(RegisterPremisesRequest request) {
 
                 // 1️⃣ Validate User
-                User owner = userRepo.findByUid(request.getOwnerUid())
-                                .orElseThrow(() -> new RuntimeException("User not found"));
+                User owner = userRepo.findByUid(request.getOwnerUid()).orElseThrow(() -> new RuntimeException("User not found"));
 
                 // 2️⃣ Validate Zone
                 Zone zone = zoneRepo.findById(request.getZoneId())
                                 .orElseThrow(() -> new RuntimeException("Zone not found or not eligible"));
 
-                // 3️⃣ Assign Bin
-                Optional<Bin> availableBinOpt = binRepo.findByStatus("IN_STOCK")
-                                .stream()
-                                .filter(b -> b.getType().equalsIgnoreCase(request.getBinType()))
-                                .findFirst();
-
-                Bin bin = availableBinOpt
-                                .orElseThrow(() -> new RuntimeException(
-                                                "No available bins of type " + request.getBinType()));
+                //Validate Bin
+                Bin bin = binRepo.findById(request.getBinCode())
+                                .orElseThrow(() -> new RuntimeException("Bin not found"));
 
                 // 4️⃣ Pair Tag
                 Tag tag = tagRepo.findByTagId(request.getTagId())
