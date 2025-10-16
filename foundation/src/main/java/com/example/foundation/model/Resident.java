@@ -13,6 +13,16 @@ public class Resident extends User {
         super(username, password, address, contactNumber);
     }
 
-    public PremisesType getPremisesType() { return premisesType; }
-    public void setPremisesType(PremisesType premisesType) { this.premisesType = premisesType; }
+    public PremisesType getPremisesType() {
+        return premisesType;
+    }
+
+    public void setPremisesType(PremisesType premisesType) {
+        this.premisesType = premisesType;
+    }
+
+    // ✅ Domain method to activate account
+    public void activateAccount() {
+        this.setActivated(true);
+    }
 }

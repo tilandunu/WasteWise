@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
 @Document(collection = "users")
-public abstract class User {
+public class User {
 
     @Id
     private String id;
