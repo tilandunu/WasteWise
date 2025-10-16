@@ -59,6 +59,7 @@ const Header: React.FC = () => {
       )}
 
       <Link to="/register-premises" className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600" /> 
+      <Link to="/assign-truck" className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600" /> 
     </header>
   );
 };

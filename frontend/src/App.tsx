@@ -7,6 +7,10 @@ import RegisterPremisesPage from "./pages/RegisterPremisesPage";
 import AddZonePage from "./pages/AddZone";
 import AddBinPage from "./pages/AddBin";
 import AddTag from "./pages/AddTag";
+import AssignTruck from "./pages/AssignTruck";
+import CreateTruck from "./pages/createTruck";
+import AssignRoute from "./pages/assignRoute";
+import CreateRoute from "./pages/CreateRoute";
 
 export default function App() {
   return (
@@ -25,6 +29,10 @@ export default function App() {
       <Route path="/add-zone" element={<AddZonePage />} />
       <Route path="/add-bin" element={<AddBinPage />} />
       <Route path="/add-tag" element={<AddTag />} />
+      <Route path="/assign-truck" element={<AssignTruck />} />
+      <Route path="/create-truck" element={<CreateTruck />} />
+      <Route path="/assign-route" element={<AssignRoute />} />
+      <Route path="/create-route" element={<CreateRoute />} />
     </Routes>
   );
 }
