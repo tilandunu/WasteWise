@@ -1,13 +1,11 @@
 package com.example.foundation.dto.request;
 
-import com.example.foundation.model.Zone;
-
 public class RegisterUserRequest {
     private String username;
     private String password;
     private String address;
     private String contactNumber;
-    private Zone zone;
+    private String zoneId; // Changed from Zone object to zoneId
 
     // --- Getters & Setters ---
     public String getUsername() { return username; }
@@ -22,6 +20,6 @@ public class RegisterUserRequest {
     public String getContactNumber() { return contactNumber; }
     public void setContactNumber(String contactNumber) { this.contactNumber = contactNumber; }
 
-    public Zone getZone() { return zone; }
-    public void setZone(Zone zone) { this.zone = zone; }
+    public String getZoneId() { return zoneId; }
+    public void setZoneId(String zoneId) { this.zoneId = zoneId; }
 }
