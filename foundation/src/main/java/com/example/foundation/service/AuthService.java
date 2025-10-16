@@ -18,6 +18,7 @@ public class AuthService {
         this.userRepository = userRepository;
     }
 
+    // Method to verify ID token and retrieve user
     public User verifyIdTokenAndGetUser(String idToken) throws FirebaseAuthException {
         FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
         String uid = decodedToken.getUid();
@@ -39,8 +40,13 @@ public class AuthService {
         newUser.setEmail(email);
         newUser.setName(name);
         newUser.setPicture(picture);
-        newUser.setRole(isFirstUser ? User.Role.ADMIN : User.Role.USER);
+        newUser.setRole(isFirstUser ? User.Role.ADMIN : User.Role.RESIDENT);
 
         return userRepository.save(newUser);
+    }
+
+    //get all users
+    public Iterable<User> getAllUsers() {
+        return userRepository.findAll();
     }
 }

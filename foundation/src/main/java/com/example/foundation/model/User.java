@@ -9,8 +9,11 @@ import java.time.Instant;
 public class User {
 
     public enum Role {
-        USER,
-        ADMIN
+        RESIDENT,
+        ADMIN,
+        OFFICER,
+        CREW,
+        PLANNER
     }
 
     @Id
@@ -21,7 +24,7 @@ public class User {
     private String name;
     private String picture;
 
-    private Role role = Role.USER;
+    private Role role = Role.RESIDENT;
 
     private Instant createdAt = Instant.now();
     private Instant updatedAt = Instant.now();

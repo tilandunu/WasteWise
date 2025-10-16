@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class RegistrationController {
 
     private final RegistrationService registrationService;
-    private final AuthService authService; // for Firebase token verification
+    private final AuthService authService;
 
     public RegistrationController(RegistrationService registrationService, AuthService authService) {
         this.registrationService = registrationService;
@@ -26,7 +26,7 @@ public class RegistrationController {
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody RegisterPremisesRequest request) {
 
-        // 1️⃣ Validate Firebase Token
+        // 1️⃣ Validate Authorization header
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(401).body("Missing or invalid Authorization header");
         }
@@ -34,17 +34,18 @@ public class RegistrationController {
         String idToken = authorizationHeader.substring(7);
         User user;
         try {
+            // 2️⃣ Verify Firebase token and get user
             user = authService.verifyIdTokenAndGetUser(idToken);
         } catch (FirebaseAuthException e) {
             return ResponseEntity.status(401).body("Invalid or expired Firebase token");
         }
 
-        // 2️⃣ Optional: Check if user is authorized officer/admin
-        if (!user.getRole().name().equals("ADMIN")) {
+        // 3️⃣ Check if user is authorized officer/admin
+        if (user.getRole() != User.Role.OFFICER) {
             return ResponseEntity.status(403).body("Unauthorized: Only officers can register premises");
         }
 
-        // 3️⃣ Delegate to service
+        // 4️⃣ Delegate to service
         try {
             PremisesResponse response = registrationService.registerPremises(request);
             return ResponseEntity.ok(response);

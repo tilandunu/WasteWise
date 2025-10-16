@@ -33,6 +33,7 @@ public class FirebaseAuthFilter extends HttpFilter {
         if (method.equalsIgnoreCase("OPTIONS")
                 || path.equals("/")
                 || path.equals("/api/auth/google-login")
+                || path.equals("/api/auth/users")
                 // Add more public paths here if needed
         ) {
             chain.doFilter(request, response);

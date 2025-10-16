@@ -3,12 +3,13 @@ import React from "react";
 import { useAuth } from "../context/AuthContext";
 import { getAuth, signOut } from "firebase/auth";
 import { app } from "../../auth/firebase";
-import { useNavigate } from "react-router-dom"; // ✅ Import useNavigate
+import { Link, useNavigate } from "react-router-dom"; // ✅ Import useNavigate
 
 const Header: React.FC = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate(); // ✅ Initialize useNavigate
   const { backendUserId } = useAuth();
+  console.log("Backend User ID:", backendUserId);
 
   const handleSignOut = async () => {
     try {
@@ -56,6 +57,8 @@ const Header: React.FC = () => {
       ) : (
         <p className="text-sm text-gray-500">Not logged in</p>
       )}
+
+      <Link to="/register-premises" className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600" /> 
     </header>
   );
 };

@@ -40,4 +40,10 @@ public class AuthController {
             return ResponseEntity.status(401).body("Invalid or expired token");
         }
     }
+
+    //Get all users
+    @PostMapping("/users")
+    public ResponseEntity<?> getAllUsers() {
+        return ResponseEntity.ok().body(authService.getAllUsers());
+    }
 }
