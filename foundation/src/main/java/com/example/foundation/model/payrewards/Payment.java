@@ -1,12 +1,11 @@
 package com.example.foundation.model.payrewards;
 
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import com.example.foundation.model.payrewards.PaymentMethod;
-import com.example.foundation.model.payrewards.Receipt;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
 public class Payment {
@@ -23,10 +22,24 @@ public class Payment {
     @DBRef
     private Account account;
     // Getters and setters
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+    public BigDecimal getAmount() { return amount; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
+    public PaymentMethod getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(PaymentMethod paymentMethod) { this.paymentMethod = paymentMethod; }
+    public String getTransactionId() { return transactionId; }
+    public void setTransactionId(String transactionId) { this.transactionId = transactionId; }
+    public LocalDateTime getDate() { return date; }
+    public void setDate(LocalDateTime date) { this.date = date; }
+    public PaymentStatus getStatus() { return status; }
+    public void setStatus(PaymentStatus status) { this.status = status; }
+    public Account getAccount() { return account; }
+    public void setAccount(Account account) { this.account = account; }
+    public Receipt getReceipt() { return receipt; }
+    public void setReceipt(Receipt receipt) { this.receipt = receipt; }
 }
 
-enum PaymentStatus {
-    PENDING,
-    SUCCESS,
-    FAILED
-}
+
+    // Getters and setters
+
