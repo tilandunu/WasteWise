@@ -5,7 +5,8 @@ public class RegisterUserRequest {
     private String password;
     private String address;
     private String contactNumber;
-    private String zoneId; // Changed from Zone object to zoneId
+    private String zoneId;           // Zone reference
+    private String premisesType;     // NEW field
 
     // --- Getters & Setters ---
     public String getUsername() { return username; }
@@ -22,4 +23,7 @@ public class RegisterUserRequest {
 
     public String getZoneId() { return zoneId; }
     public void setZoneId(String zoneId) { this.zoneId = zoneId; }
+
+    public String getPremisesType() { return premisesType; }
+    public void setPremisesType(String premisesType) { this.premisesType = premisesType; }
 }

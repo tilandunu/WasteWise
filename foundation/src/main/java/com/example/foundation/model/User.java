@@ -27,7 +27,7 @@ public abstract class User {
         this.password = password;
         this.address = address;
         this.contactNumber = contactNumber;
-
+        
     }
 
     // --- Getters & Setters ---

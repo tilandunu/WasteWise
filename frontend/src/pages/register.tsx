@@ -7,6 +7,9 @@ interface Zone {
   name: string;
 }
 
+// Use const array for premises types
+const PREMISES_TYPES = ["HOUSE", "BUSINESS"];
+
 const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
     username: "",
@@ -14,23 +17,23 @@ const RegisterPage: React.FC = () => {
     address: "",
     contactNumber: "",
     zoneId: "",
+    premisesType: "HOUSE", // default value
   });
+
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(false);
   const [responseMsg, setResponseMsg] = useState("");
   const navigate = useNavigate();
 
-  // Fetch zones from backend (or mock if not ready)
   useEffect(() => {
     const fetchZones = async () => {
       try {
-        const res = await axios.get("/api/zones/all"); // endpoint to fetch zones
+        const res = await axios.get("/api/zones/all");
         setZones(res.data);
       } catch (err) {
         console.error("Failed to fetch zones, using mock data.");
       }
     };
-
     fetchZones();
   }, []);
 
@@ -48,10 +51,7 @@ const RegisterPage: React.FC = () => {
     try {
       await axios.post("/api/users/register", formData);
       setResponseMsg("Registration successful");
-
-      // Redirect to login page after successful registration
       navigate("/login");
-
     } catch (err: any) {
       console.error("Registration error:", err);
       setResponseMsg(err.response?.data || "Registration failed");
@@ -63,9 +63,7 @@ const RegisterPage: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-gray-100">
       <div className="w-full max-w-md bg-white p-6 rounded shadow">
-        <h2 className="text-xl font-semibold mb-4 text-center">
-          Register Account
-        </h2>
+        <h2 className="text-xl font-semibold mb-4 text-center">Register Account</h2>
 
         {responseMsg && (
           <p
@@ -129,6 +127,21 @@ const RegisterPage: React.FC = () => {
             {zones.map((zone) => (
               <option key={zone.id} value={zone.id}>
                 {zone.name}
+              </option>
+            ))}
+          </select>
+
+          {/* Premises Type Dropdown */}
+          <select
+            name="premisesType"
+            value={formData.premisesType}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+            required
+          >
+            {PREMISES_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
               </option>
             ))}
           </select>
