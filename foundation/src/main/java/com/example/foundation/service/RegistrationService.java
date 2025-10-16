@@ -13,7 +13,6 @@ import com.example.foundation.repository.TagRepository;
 import com.example.foundation.repository.UserRepository;
 import com.example.foundation.repository.ZoneRepository;
 
-
 import org.springframework.stereotype.Service;
 
 @Service
@@ -38,14 +37,17 @@ public class RegistrationService {
         public PremisesResponse registerPremises(RegisterPremisesRequest request) {
 
                 // 1️⃣ Validate User
-                User owner = userRepo.findByUid(request.getOwnerUid()).orElseThrow(() -> new RuntimeException("User not found"));
+                User owner = userRepo.findByUid(request.getOwnerUid())
+                                .orElseThrow(() -> new RuntimeException("User not found"));
 
                 // 2️⃣ Validate Zone
                 Zone zone = zoneRepo.findById(request.getZoneId())
                                 .orElseThrow(() -> new RuntimeException("Zone not found or not eligible"));
 
-                //Validate Bin
-                Bin bin = binRepo.findById(request.getBinCode())
+                System.out.println("Bin Code : " + request.getBinId());
+
+                // Validate Bin
+                Bin bin = binRepo.getBinByBinCode(request.getBinId())
                                 .orElseThrow(() -> new RuntimeException("Bin not found"));
 
                 // 4️⃣ Pair Tag
@@ -84,14 +86,6 @@ public class RegistrationService {
                 response.setContactNumber(premises.getContactNumber());
                 response.setZoneName(zone.getName());
                 response.setOwnerName(owner.getName());
-
-                PremisesResponse.BinResponse binResponse = new PremisesResponse.BinResponse();
-                binResponse.setBinId(bin.getId());
-                binResponse.setBinType(bin.getType());
-                binResponse.setStatus(bin.getStatus());
-                binResponse.setTagId(tag.getTagId());
-
-                response.setBin(binResponse);
 
                 return response;
         }

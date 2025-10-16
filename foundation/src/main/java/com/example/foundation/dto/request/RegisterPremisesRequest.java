@@ -59,7 +59,7 @@ public class RegisterPremisesRequest {
         this.tagId = tagId;
     }
 
-    public String getBinCode() {
+    public String getBinId() {
         return binId;
     }
 }
