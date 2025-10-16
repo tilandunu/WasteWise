@@ -13,6 +13,7 @@ public class Premises {
     private String address;
     private String type; // e.g. "Household" or "Business"
     private String contactNumber;
+    private boolean eligible = true;
 
     @DBRef
     private User owner;
@@ -20,64 +21,83 @@ public class Premises {
     @DBRef
     private Zone zone;
 
-    private boolean eligible = true;
+    @DBRef
+    private Route route; // Each premises belongs to one route
 
     // Constructors
     public Premises() {}
 
-    public Premises(String address, String type, String contactNumber, User owner, Zone zone) {
+    public Premises(String address, String type, String contactNumber, User owner, Zone zone, Route route) {
         this.address = address;
         this.type = type;
         this.contactNumber = contactNumber;
         this.owner = owner;
         this.zone = zone;
-    }
-
-    public void setAddress(String address2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setAddress'");
-    }
-
-    public void setType(String type2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setType'");
-    }
-
-    public void setContactNumber(String contactNumber2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setContactNumber'");
-    }
-
-    public void setOwner(User owner2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setOwner'");
-    }
-
-    public void setZone(Zone zone2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setZone'");
-    }
-
-    public Object getId() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getId'");
-    }
-
-    public Object getAddress() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAddress'");
-    }
-
-    public Object getType() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getType'");
-    }
-
-    public Object getContactNumber() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getContactNumber'");
+        this.route = route;
     }
 
     // Getters & Setters
-    // ...
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getContactNumber() {
+        return contactNumber;
+    }
+
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
+    }
+
+    public boolean isEligible() {
+        return eligible;
+    }
+
+    public void setEligible(boolean eligible) {
+        this.eligible = eligible;
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
+    public Zone getZone() {
+        return zone;
+    }
+
+    public void setZone(Zone zone) {
+        this.zone = zone;
+    }
+
+    public Route getRoute() {
+        return route;
+    }
+
+    public void setRoute(Route route) {
+        this.route = route;
+    }
 }

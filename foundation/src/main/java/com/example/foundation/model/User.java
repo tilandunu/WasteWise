@@ -1,6 +1,7 @@
 package com.example.foundation.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
@@ -25,6 +26,10 @@ public class User {
 
     private Instant createdAt = Instant.now();
     private Instant updatedAt = Instant.now();
+
+    @DBRef
+    private Truck assignedTruck; // optional — link back to truck
+
 
     // --- Getters & Setters ---
 
