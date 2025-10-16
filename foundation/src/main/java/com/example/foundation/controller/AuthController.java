@@ -1,21 +1,29 @@
 package com.example.foundation.controller;
 
+import com.example.foundation.dto.response.AuthResponse;
 import com.example.foundation.model.User;
 import com.example.foundation.service.AuthService;
 import com.google.firebase.auth.FirebaseAuthException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
+    //
     private final AuthService authService;
 
+    // Constructor injection
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
 
+    // Endpoint for Google login
     @PostMapping("/google-login")
     public ResponseEntity<?> googleLogin(@RequestHeader("Authorization") String authorizationHeader) {
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
@@ -30,25 +38,6 @@ public class AuthController {
             return ResponseEntity.ok().body(new AuthResponse("Login successful", user));
         } catch (FirebaseAuthException e) {
             return ResponseEntity.status(401).body("Invalid or expired token");
-        }
-    }
-
-    // DTO class for response
-    public static class AuthResponse {
-        private String message;
-        private User user;
-
-        public AuthResponse(String message, User user) {
-            this.message = message;
-            this.user = user;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public User getUser() {
-            return user;
         }
     }
 }
