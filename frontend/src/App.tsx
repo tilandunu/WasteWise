@@ -6,6 +6,7 @@ import PaymentTest from "./components/PaymentTest";
 import RegisterPremisesPage from "./pages/RegisterPremisesPage";
 import AddZonePage from "./pages/AddZone";
 import AddBinPage from "./pages/AddBin";
+import AddTag from "./pages/AddTag";
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
       <Route path="/register-premises" element={<RegisterPremisesPage />} />
       <Route path="/add-zone" element={<AddZonePage />} />
       <Route path="/add-bin" element={<AddBinPage />} />
+      <Route path="/add-tag" element={<AddTag />} />
     </Routes>
   );
 }

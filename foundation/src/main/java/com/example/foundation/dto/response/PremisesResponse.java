@@ -10,61 +10,116 @@ public class PremisesResponse {
     private String ownerName;
     private BinResponse bin;
 
-    // Inner DTO for the bin details
+    // --- Inner DTO for bin details ---
     public static class BinResponse {
         private String binId;
         private String binType;
         private String status;
         private String tagId;
 
-        // Getters & Setters
-        public String getBinId() { return binId; }
-        public void setBinId(String binId) { this.binId = binId; }
+        // --- Getters & Setters ---
+        public String getBinId() {
+            return binId;
+        }
 
-        public String getBinType() { return binType; }
-        public void setBinType(String binType) { this.binType = binType; }
+        public void setBinId(String binId) {
+            this.binId = binId;
+        }
 
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
+        public String getBinType() {
+            return binType;
+        }
 
-        public String getTagId() { return tagId; }
-        public void setTagId(String tagId) { this.tagId = tagId; }
+        public void setBinType(String binType) {
+            this.binType = binType;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public String getTagId() {
+            return tagId;
+        }
+
+        public void setTagId(String tagId) {
+            this.tagId = tagId;
+        }
     }
 
-    public void setPremisesId(Object id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setPremisesId'");
+    // --- Getters ---
+    public String getPremisesId() {
+        return premisesId;
     }
 
-    public void setAddress(Object address2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setAddress'");
+    public String getAddress() {
+        return address;
     }
 
-    public void setType(Object type2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setType'");
+    public String getType() {
+        return type;
     }
 
-    public void setContactNumber(Object contactNumber2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setContactNumber'");
+    public String getContactNumber() {
+        return contactNumber;
     }
 
-    public void setZoneName(String name) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setZoneName'");
+    public String getZoneName() {
+        return zoneName;
     }
 
-    public void setOwnerName(String name) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setOwnerName'");
+    public String getOwnerName() {
+        return ownerName;
     }
 
-    public void setBin(BinResponse binResponse) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setBin'");
+    public BinResponse getBin() {
+        return bin;
     }
 
-    // Getters & Setters
+    // --- Setters ---
+    public void setPremisesId(String premisesId) {
+        this.premisesId = premisesId;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
+    }
+
+    public void setZoneName(String zoneName) {
+        this.zoneName = zoneName;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
+
+    public void setBin(BinResponse bin) {
+        this.bin = bin;
+    }
+
+    // --- toString ---
+    @Override
+    public String toString() {
+        return "PremisesResponse{" +
+                "premisesId='" + premisesId + '\'' +
+                ", address='" + address + '\'' +
+                ", type='" + type + '\'' +
+                ", contactNumber='" + contactNumber + '\'' +
+                ", zoneName='" + zoneName + '\'' +
+                ", ownerName='" + ownerName + '\'' +
+                ", bin=" + (bin != null ? bin.getBinId() : "null") +
+                '}';
+    }
 }

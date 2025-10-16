@@ -22,7 +22,7 @@ public class Premises {
 
     private boolean eligible = true;
 
-    // Constructors
+    // --- Constructors ---
     public Premises() {}
 
     public Premises(String address, String type, String contactNumber, User owner, Zone zone) {
@@ -31,53 +31,78 @@ public class Premises {
         this.contactNumber = contactNumber;
         this.owner = owner;
         this.zone = zone;
+        this.eligible = true;
     }
 
-    public void setAddress(String address2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setAddress'");
+    // --- Getters ---
+    public String getId() {
+        return id;
     }
 
-    public void setType(String type2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setType'");
+    public String getAddress() {
+        return address;
     }
 
-    public void setContactNumber(String contactNumber2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setContactNumber'");
+    public String getType() {
+        return type;
     }
 
-    public void setOwner(User owner2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setOwner'");
+    public String getContactNumber() {
+        return contactNumber;
     }
 
-    public void setZone(Zone zone2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setZone'");
+    public User getOwner() {
+        return owner;
     }
 
-    public Object getId() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getId'");
+    public Zone getZone() {
+        return zone;
     }
 
-    public Object getAddress() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAddress'");
+    public boolean isEligible() {
+        return eligible;
     }
 
-    public Object getType() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getType'");
+    // --- Setters ---
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public Object getContactNumber() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getContactNumber'");
+    public void setAddress(String address) {
+        this.address = address;
     }
 
-    // Getters & Setters
-    // ...
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
+    public void setZone(Zone zone) {
+        this.zone = zone;
+    }
+
+    public void setEligible(boolean eligible) {
+        this.eligible = eligible;
+    }
+
+    // --- toString ---
+    @Override
+    public String toString() {
+        return "Premises{" +
+                "id='" + id + '\'' +
+                ", address='" + address + '\'' +
+                ", type='" + type + '\'' +
+                ", contactNumber='" + contactNumber + '\'' +
+                ", owner=" + (owner != null ? owner.getName() : "null") +
+                ", zone=" + (zone != null ? zone.getName() : "null") +
+                ", eligible=" + eligible +
+                '}';
+    }
 }
