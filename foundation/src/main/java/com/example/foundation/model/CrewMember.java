@@ -1,10 +1,8 @@
 package com.example.foundation.model;
 
 import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 
-@Document(collection = "crew_members")
 public class CrewMember extends User {
 
     private boolean available = true; // whether crew member is available for assignment
