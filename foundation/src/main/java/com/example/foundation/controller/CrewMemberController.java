@@ -1,6 +1,5 @@
 package com.example.foundation.controller;
 
-import com.example.foundation.dto.request.RegisterUserRequest;
 import com.example.foundation.model.CrewMember;
 import com.example.foundation.service.CrewMemberService;
 import org.springframework.http.ResponseEntity;

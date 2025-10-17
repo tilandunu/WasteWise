@@ -5,11 +5,13 @@ import {
   NavbarBrand,
   NavbarContent,
   NavbarItem,
-} from '@heroui/navbar';
-import { Button } from '@heroui/button';
-import { Link } from '@heroui/link';
-import { ThemeSwitch } from '@/components/theme-switch'; // optional
-import { Logo } from '@/components/icons'; // optional
+
+} from "@heroui/navbar";
+import { Button } from "@heroui/button";
+import { Link } from "@heroui/link";
+import { ThemeSwitch } from "@/components/theme-switch"; // optional
+import { Logo } from "@/components/icons"; // optional
+import { User } from "@heroui/react";
 
 interface BackendUser {
   id: string;
@@ -41,8 +43,6 @@ const Header: React.FC = () => {
     navigate('/login');
   };
 
-  const isCrewMember = !!backendUser?.assignedTruck;
-
   return (
     <HeroUINavbar
       isBordered
@@ -51,10 +51,11 @@ const Header: React.FC = () => {
       className='bg-background'
     >
       {/* Brand Section */}
-      <NavbarBrand className='flex items-center gap-2'>
-        <Link href='/' color='foreground' className='flex items-center gap-1'>
-          <Logo className='h-5 w-5 text-primary' />
-          <p className='font-bold text-inherit text-lg'>My App</p>
+
+      <NavbarBrand className="flex items-center gap-2">
+        <Link href="/" color="foreground" className="flex items-center gap-1">
+          <Logo className="h-15 w-15 text-primary" />
+          <p className="font-bold text-inherit text-[1.7rem]">WasteWise</p>
         </Link>
       </NavbarBrand>
 
@@ -63,31 +64,16 @@ const Header: React.FC = () => {
         {backendUser ? (
           <>
             {/* User Info */}
-            <NavbarItem className='flex flex-col text-right leading-tight'>
-              <span className='text-sm font-medium'>
-                {backendUser.username}
-              </span>
-              {isCrewMember ? (
-                <>
-                  <span className='text-xs text-default-500'>
-                    {backendUser.assignedTruck?.registrationNumber} (
-                    {backendUser.assignedTruck?.model})
-                  </span>
-                  <span className='text-xs text-default-500'>
-                    {backendUser.assignedTruck?.assignedRoute?.routeName ||
-                      'N/A'}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className='text-xs text-default-500'>
-                    Address: {backendUser.address || 'N/A'}
-                  </span>
-                  <span className='text-xs text-default-500'>
-                    Contact: {backendUser.contactNumber || 'N/A'}
-                  </span>
-                </>
-              )}
+
+            <NavbarItem className="flex flex-col text-right leading-tight">
+              <User
+                avatarProps={{
+                  src: "https://cdn-icons-png.flaticon.com/512/9131/9131478.png",
+                }}
+                description={backendUser.contactNumber || "N/A"}
+                name={backendUser.username}
+              />
+
             </NavbarItem>
 
             {/* Sign Out */}

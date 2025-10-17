@@ -7,7 +7,7 @@ import { Button } from "@heroui/button";
 import { Divider } from "@heroui/divider";
 import  Header from "../components/header";
 
-const SignInPage: React.FC = () => {
+const CrewSignInPage: React.FC = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -31,7 +31,7 @@ const SignInPage: React.FC = () => {
       if (user.assignedTruck != null) {
         navigate("/crew-portal");
       } else {
-        navigate("/");
+        navigate("/crew-portal");
       }
     } catch (err: any) {
       console.error("Login error:", err);
@@ -47,7 +47,7 @@ const SignInPage: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
         <Card shadow="lg" className="w-full max-w-md p-6">
           <CardHeader className="text-center">
-            <h2 className="text-2xl font-bold">Sign In to WasteWise</h2>
+            <h2 className="text-2xl font-bold">Sign In to WasteWise as crewMember</h2>
           </CardHeader>
 
           <Divider className="my-4" />
@@ -84,21 +84,9 @@ const SignInPage: React.FC = () => {
                 className="w-full"
                 isLoading={loading}
               >
-                {loading ? "Signing in..." : "Sign In"}
+                {loading ? "Signing in..." : "Sign In as crewMember"}
               </Button>
             </form>
-
-            <p className="mt-4 text-center text-sm text-default-500">
-              Don't have an account?{" "}
-              <Button
-                variant="flat"
-                color="secondary"
-                size="sm"
-                onPress={() => navigate("/register")}
-              >
-                Register here
-              </Button>
-            </p>
           </CardBody>
         </Card>
       </div>
@@ -106,4 +94,4 @@ const SignInPage: React.FC = () => {
   );
 };
 
-export default SignInPage;
+export default CrewSignInPage;
