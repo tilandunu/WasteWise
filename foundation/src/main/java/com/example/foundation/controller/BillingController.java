@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.foundation.dto.request.ApplyCreditsRequest;
@@ -52,6 +53,19 @@ public class BillingController {
         try {
             PaymentResponse resp = billingService.applyCredits(userId, req);
             return ResponseEntity.ok(resp);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
+    // Admin: generate monthly invoices for all users
+    @PostMapping("/generate-monthly")
+    public ResponseEntity<?> generateMonthly(@RequestParam double amount) {
+        try {
+            billingService.generateMonthlyInvoices(amount);
+            return ResponseEntity.ok("Monthly invoices generated");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (RuntimeException e) {

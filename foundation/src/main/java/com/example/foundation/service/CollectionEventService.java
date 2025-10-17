@@ -1,14 +1,14 @@
 package com.example.foundation.service;
 
-import com.example.foundation.model.Bin;
-import com.example.foundation.model.CollectionEvent;
-import com.example.foundation.repository.CollectionEventRepository;
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import com.example.foundation.service.BillingService;
+import com.example.foundation.model.Bin;
+import com.example.foundation.model.CollectionEvent;
 import com.example.foundation.model.User;
+import com.example.foundation.repository.CollectionEventRepository;
 
 @Service
 public class CollectionEventService {

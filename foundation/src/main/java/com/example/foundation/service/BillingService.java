@@ -146,4 +146,23 @@ public class BillingService {
         return new PaymentResponse(txId, "SUCCESS", account.getBalance());
     }
 
+    /**
+     * Generate a monthly invoice for all billing accounts by adding a charge to each account.
+     * This creates a PaymentRecord with method INVOICE and status PENDING so residents can pay manually.
+     */
+    public void generateMonthlyInvoices(double amount) {
+        if (amount <= 0) throw new IllegalArgumentException("Invoice amount must be > 0");
+
+        var accounts = billingAccountRepository.findAll();
+        for (var account : accounts) {
+            account.setBalance(account.getBalance() + amount);
+            billingAccountRepository.save(account);
+
+            String txId = "INVOICE-" + UUID.randomUUID();
+            PaymentRecord record = new PaymentRecord(txId, account.getUserId(), amount, "INVOICE", PaymentRecord.Status.PENDING, Instant.now(), "Monthly invoice generated");
+            paymentRecordRepository.save(record);
+            paymentsByUser.computeIfAbsent(account.getUserId(), k -> new java.util.ArrayList<>()).add(record);
+        }
+    }
+
 }
