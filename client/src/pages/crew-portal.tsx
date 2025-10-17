@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "../config/axiosInstance";
 import Header from "../components/header";
-import {
-  Card,
-  CardHeader,
-  CardBody,
-} from "@heroui/card";
+import { Card, CardHeader, CardBody } from "@heroui/card";
 import { Divider } from "@heroui/divider";
 import {
   Table,
@@ -17,7 +13,14 @@ import {
 } from "@heroui/table";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from "@heroui/modal";
 import { Spinner } from "@heroui/spinner";
 import { Switch, Input } from "@heroui/react";
 
@@ -53,18 +56,17 @@ const CrewPortal: React.FC = () => {
   const [bins, setBins] = useState<Bin[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Force fail switch
   const [forceFail, setForceFail] = useState(false);
 
-  // Scan modal state
   const [currentBin, setCurrentBin] = useState<Bin | null>(null);
   const [tagInfo, setTagInfo] = useState<Tag | null>(null);
   const [manualTagId, setManualTagId] = useState("");
   const [scanning, setScanning] = useState(false);
 
-  const scanModal = useDisclosure(); // spinner + success
-  const scanFailModal = useDisclosure(); // fail modal
+  const scanModal = useDisclosure();
+  const scanFailModal = useDisclosure();
 
+  // Fetch user and bins
   useEffect(() => {
     const storedUser = localStorage.getItem("loggedUser");
     if (storedUser) setUser(JSON.parse(storedUser));
@@ -83,18 +85,18 @@ const CrewPortal: React.FC = () => {
     fetchBins();
   }, []);
 
+  // Handle bin scan
   const handleScanClick = (bin: Bin) => {
     setCurrentBin(bin);
     setTagInfo(null);
     setManualTagId("");
 
-    // Open spinner modal
+    // Show spinner modal
     setScanning(true);
     scanModal.onOpen();
 
     setTimeout(async () => {
       setScanning(false);
-
       try {
         const tagIdToUse = forceFail ? "" : bin.tag.tagId;
         if (!tagIdToUse) throw new Error("Forced or missing Tag ID");
@@ -109,12 +111,14 @@ const CrewPortal: React.FC = () => {
     }, 1500);
   };
 
+  // Handle manual scan
   const handleManualScan = async () => {
-    if (!manualTagId) return alert("Enter a Tag ID");
+    if (!manualTagId || !currentBin) return alert("Enter a Tag ID");
 
     try {
       const res = await axios.get<Tag>(`/api/bins/scan/${manualTagId}`);
       setTagInfo(res.data);
+
       scanFailModal.onOpenChange(); // close fail modal
       scanModal.onOpen(); // reopen main modal with tag info
     } catch (err) {
@@ -122,26 +126,31 @@ const CrewPortal: React.FC = () => {
     }
   };
 
+  // Handle bin collection
   const handleMarkCollected = async () => {
-    if (!currentBin) return;
-    const tagIdToUse = tagInfo?.tagId;
+    if (!currentBin) return alert("No bin selected");
+
+    const tagIdToUse = tagInfo?.tagId || manualTagId;
     if (!tagIdToUse) return alert("Tag ID missing");
 
     try {
-      await axios.post(`/api/bins/collect`, {
-        binId: currentBin.id,
-        tagId: tagIdToUse,
-        crewId: user?.id,
-      });
+      console.log("Tag ID:", tagIdToUse);
+      console.log("Bin ID:", currentBin.id);
+
+      await axios.post(
+        `/api/collection-event?binId=${currentBin.id}&tagId=${tagIdToUse}&crewId=${user?.id}`
+      );
+
       alert(`✅ Bin ${currentBin.binCode} marked as collected.`);
 
-      // Close modal and refresh bins
       scanModal.onOpenChange();
+
+      // Refresh bins
       const binsRes = await axios.get<Bin[]>("/api/bins/assigned");
       setBins(binsRes.data);
     } catch (err) {
-      alert("❌ Failed to mark bin as collected");
       console.error(err);
+      alert("❌ Failed to mark bin as collected");
     }
   };
 
@@ -154,7 +163,11 @@ const CrewPortal: React.FC = () => {
         {/* Force Fail Switch */}
         <div className="flex justify-end items-center mb-4 gap-2">
           <span className="text-sm text-default-500">Force Scan Fail:</span>
-          <Switch isSelected={forceFail} onValueChange={setForceFail} color="danger" />
+          <Switch
+            isSelected={forceFail}
+            onValueChange={setForceFail}
+            color="danger"
+          />
         </div>
 
         {/* Crew Info */}
@@ -167,13 +180,22 @@ const CrewPortal: React.FC = () => {
             {user ? (
               <>
                 <div>
-                  Username: <Chip size="sm" color="primary">{user.username}</Chip>
+                  Username:{" "}
+                  <Chip size="sm" color="primary">
+                    {user.username}
+                  </Chip>
                 </div>
                 <div>
-                  Truck: <Chip size="sm">{user.assignedTruck?.registrationNumber || "N/A"}</Chip>
+                  Truck:{" "}
+                  <Chip size="sm">
+                    {user.assignedTruck?.registrationNumber || "N/A"}
+                  </Chip>
                 </div>
                 <div>
-                  Route: <Chip size="sm">{user.assignedTruck?.assignedRoute?.routeName || "N/A"}</Chip>
+                  Route:{" "}
+                  <Chip size="sm">
+                    {user.assignedTruck?.assignedRoute?.routeName || "N/A"}
+                  </Chip>
                 </div>
               </>
             ) : (
@@ -207,12 +229,21 @@ const CrewPortal: React.FC = () => {
                       <TableCell>{bin.binCode}</TableCell>
                       <TableCell>{bin.type}</TableCell>
                       <TableCell>
-                        <Chip size="sm" color={bin.status === "Assigned" ? "success" : "warning"}>
+                        <Chip
+                          size="sm"
+                          color={
+                            bin.status === "Assigned" ? "success" : "warning"
+                          }
+                        >
                           {bin.status}
                         </Chip>
                       </TableCell>
                       <TableCell>
-                        <Button size="sm" color="primary" onPress={() => handleScanClick(bin)}>
+                        <Button
+                          size="sm"
+                          color="primary"
+                          onPress={() => handleScanClick(bin)}
+                        >
                           Scan Tag
                         </Button>
                       </TableCell>
@@ -224,7 +255,7 @@ const CrewPortal: React.FC = () => {
           </CardBody>
         </Card>
 
-        {/* Scan Modal (spinner + tag info) */}
+        {/* Scan Modal */}
         <Modal isOpen={scanModal.isOpen} onOpenChange={scanModal.onOpenChange}>
           <ModalContent>
             {(onClose) => (
@@ -238,20 +269,28 @@ const CrewPortal: React.FC = () => {
                     </div>
                   ) : tagInfo ? (
                     <div className="space-y-2">
-                      <p>Tag ID: <strong>{tagInfo.tagId}</strong></p>
-                      <p>Weight: <strong>{tagInfo.weight} kg</strong></p>
-                      <p>Fill Level: <strong>{tagInfo.fillLevel} %</strong></p>
+                      <p>
+                        Tag ID: <strong>{tagInfo.tagId}</strong>
+                      </p>
+                      <p>
+                        Weight: <strong>{tagInfo.weight} kg</strong>
+                      </p>
+                      <p>
+                        Fill Level: <strong>{tagInfo.fillLevel} %</strong>
+                      </p>
                     </div>
                   ) : (
                     <p>Waiting for scan...</p>
                   )}
                 </ModalBody>
                 <ModalFooter>
-                  <Button variant="light" onPress={onClose}>Cancel</Button>
+                  <Button variant="light" onPress={onClose}>
+                    Cancel
+                  </Button>
                   <Button
                     color="success"
                     onPress={handleMarkCollected}
-                    disabled={!tagInfo}
+                    disabled={!tagInfo && !manualTagId}
                   >
                     Mark Collected
                   </Button>
@@ -262,7 +301,10 @@ const CrewPortal: React.FC = () => {
         </Modal>
 
         {/* Scan Failed Modal */}
-        <Modal isOpen={scanFailModal.isOpen} onOpenChange={scanFailModal.onOpenChange}>
+        <Modal
+          isOpen={scanFailModal.isOpen}
+          onOpenChange={scanFailModal.onOpenChange}
+        >
           <ModalContent>
             {(onClose) => (
               <>
@@ -276,8 +318,14 @@ const CrewPortal: React.FC = () => {
                   />
                 </ModalBody>
                 <ModalFooter>
-                  <Button variant="light" onPress={onClose}>Cancel</Button>
-                  <Button color="primary" onPress={handleManualScan} disabled={!manualTagId}>
+                  <Button variant="light" onPress={onClose}>
+                    Cancel
+                  </Button>
+                  <Button
+                    color="primary"
+                    onPress={handleManualScan}
+                    disabled={!manualTagId}
+                  >
                     Scan Tag
                   </Button>
                 </ModalFooter>
