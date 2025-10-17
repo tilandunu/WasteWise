@@ -23,7 +23,7 @@ import {
 } from "@heroui/modal";
 import { Switch } from "@heroui/switch";
 import Header from "../components/header";
-
+import { Image } from "@heroui/react";
 interface Zone {
   id: string;
   name: string;
@@ -126,8 +126,12 @@ const AllUsersPage: React.FC = () => {
           [userId]: { validated: false, failed: true },
         }));
         setResultSuccess(false);
-        setResultMessage("❌ Zone validation failed. Try again or override manually.");
-        setResultImage("https://via.placeholder.com/300x180.png?text=Validation+Failed");
+        setResultMessage(
+          "❌ Zone validation failed. Try again or override manually."
+        );
+        setResultImage(
+          "https://via.placeholder.com/300x180.png?text=Validation+Failed"
+        );
       } else {
         setValidationStates((prev) => ({
           ...prev,
@@ -135,7 +139,9 @@ const AllUsersPage: React.FC = () => {
         }));
         setResultSuccess(true);
         setResultMessage("✅ Zone validated successfully!");
-        setResultImage("https://via.placeholder.com/300x180.png?text=Validation+Success");
+        setResultImage(
+          "https://via.placeholder.com/300x180.png?text=Validation+Success"
+        );
       }
 
       setTimeout(() => setResultOpen(true), 200);
@@ -154,8 +160,12 @@ const AllUsersPage: React.FC = () => {
         [userId]: { validated: true, failed: false },
       }));
       setResultSuccess(true);
-      setResultMessage("⚠️ Validation manually overridden. Proceed with caution.");
-      setResultImage("https://via.placeholder.com/300x180.png?text=Manual+Override");
+      setResultMessage(
+        "⚠️ Validation manually overridden. Proceed with caution."
+      );
+      setResultImage(
+        "https://via.placeholder.com/300x180.png?text=Manual+Override"
+      );
 
       setTimeout(() => setResultOpen(true), 200);
     }, 3000);
@@ -178,14 +188,18 @@ const AllUsersPage: React.FC = () => {
       closeAllModals();
       setResultSuccess(true);
       setResultMessage("✅ Bin and tag successfully assigned.");
-      setResultImage("https://via.placeholder.com/300x180.png?text=Assign+Success");
+      setResultImage(
+        "https://via.placeholder.com/300x180.png?text=Assign+Success"
+      );
       setResultOpen(true);
     } catch (err) {
       console.error(err);
       closeAllModals();
       setResultSuccess(false);
       setResultMessage("❌ Failed to assign bin. Please try again.");
-      setResultImage("https://via.placeholder.com/300x180.png?text=Assign+Error");
+      setResultImage(
+        "https://via.placeholder.com/300x180.png?text=Assign+Error"
+      );
       setResultOpen(true);
     }
   };
@@ -240,7 +254,11 @@ const AllUsersPage: React.FC = () => {
               ✅ All residents have been assigned bins.
             </p>
           ) : (
-            <Table aria-label="Residents without bin" className="mt-4" removeWrapper>
+            <Table
+              aria-label="Residents without bin"
+              className="mt-4"
+              removeWrapper
+            >
               <TableHeader>
                 <TableColumn>Username</TableColumn>
                 <TableColumn>Address</TableColumn>
@@ -274,7 +292,9 @@ const AllUsersPage: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         {user.activated ? (
-                          <span className="text-default-500 font-medium">Assigned</span>
+                          <span className="text-default-500 font-medium">
+                            Assigned
+                          </span>
                         ) : !state.validated ? (
                           <Button
                             size="sm"
@@ -327,16 +347,13 @@ const AllUsersPage: React.FC = () => {
           <ModalHeader className="font-semibold text-primary">
             Validating Zone...
           </ModalHeader>
-          <ModalBody className="flex flex-col items-center justify-center space-y-4">
-            <Spinner size="lg" color="primary" />
-            <img
-              src="https://via.placeholder.com/300x180.png?text=Validating"
+          <ModalBody className="flex flex-col items-center justify-center">
+            <Image
+              src="../../assets/images/vali_map.gif"
               alt="Validating"
-              className="rounded-xl shadow-md"
+              width={300}
             />
-            <p className="text-center text-default-500">
-              Please wait while we check the resident’s zone data.
-            </p>
+            <Spinner size="lg" color="primary" variant="wave"/>
           </ModalBody>
         </ModalContent>
       </Modal>
@@ -349,10 +366,10 @@ const AllUsersPage: React.FC = () => {
           </ModalHeader>
           <ModalBody className="flex flex-col items-center justify-center space-y-4">
             <Spinner size="lg" color="warning" />
-            <img
-              src="https://via.placeholder.com/300x180.png?text=Overriding"
-              alt="Overriding"
-              className="rounded-xl shadow-md"
+            <Image
+              src="../../assets/images/override.gif"
+              alt="Validating"
+              width={300}
             />
             <p className="text-center text-default-500">
               Please wait while manual override is being applied.
@@ -372,15 +389,14 @@ const AllUsersPage: React.FC = () => {
             {resultSuccess ? "Success" : "Error"}
           </ModalHeader>
           <ModalBody className="flex flex-col items-center space-y-4">
-            <img
-              src={resultImage}
-              alt="Result"
-              className="rounded-xl shadow-md"
-            />
             <p className="text-center">{resultMessage}</p>
           </ModalBody>
           <ModalFooter>
-            <Button color="primary" onPress={() => setResultOpen(false)} size="sm">
+            <Button
+              color="primary"
+              onPress={() => setResultOpen(false)}
+              size="sm"
+            >
               OK
             </Button>
           </ModalFooter>
@@ -437,7 +453,12 @@ const AllUsersPage: React.FC = () => {
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button variant="light" onPress={onClose} color="danger" size="sm">
+                <Button
+                  variant="light"
+                  onPress={onClose}
+                  color="danger"
+                  size="sm"
+                >
                   Cancel
                 </Button>
                 <Button
