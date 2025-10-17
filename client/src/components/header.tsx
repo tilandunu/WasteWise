@@ -1,17 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Navbar as HeroUINavbar,
   NavbarBrand,
   NavbarContent,
   NavbarItem,
-
 } from "@heroui/navbar";
 import { Button } from "@heroui/button";
 import { Link } from "@heroui/link";
 import { ThemeSwitch } from "@/components/theme-switch"; // optional
 import { Logo } from "@/components/icons"; // optional
-import { User } from "@heroui/react";
 
 interface BackendUser {
   id: string;
@@ -33,55 +31,80 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('loggedUser');
+    const storedUser = localStorage.getItem("loggedUser");
     if (storedUser) setBackendUser(JSON.parse(storedUser));
   }, []);
 
   const handleSignOut = () => {
-    localStorage.removeItem('loggedUser');
+    localStorage.removeItem("loggedUser");
     setBackendUser(null);
-    navigate('/login');
+    navigate("/login");
   };
+
+  const isCrewMember = !!backendUser?.assignedTruck;
 
   return (
     <HeroUINavbar
       isBordered
-      maxWidth='xl'
-      position='sticky'
-      className='bg-background'
+      maxWidth="xl"
+      position="sticky"
+      className="bg-background"
     >
       {/* Brand Section */}
-
       <NavbarBrand className="flex items-center gap-2">
         <Link href="/" color="foreground" className="flex items-center gap-1">
-          <Logo className="h-15 w-15 text-primary" />
-          <p className="font-bold text-inherit text-[1.7rem]">WasteWise</p>
+          <Logo className="h-5 w-5 text-primary" />
+          <p className="font-bold text-inherit text-lg">My App</p>
         </Link>
       </NavbarBrand>
 
       {/* Right Side */}
-      <NavbarContent justify='end' className='flex items-center gap-4'>
+      <NavbarContent justify="end" className="flex items-center gap-4">
         {backendUser ? (
           <>
+            {/* Route Management Button */}
+            <NavbarItem>
+              <Button
+                as={Link}
+                href="/route-management"
+                color="primary"
+                variant="flat"
+                size="sm"
+              >
+                Route Management
+              </Button>
+            </NavbarItem>
+
             {/* User Info */}
-
             <NavbarItem className="flex flex-col text-right leading-tight">
-              <User
-                avatarProps={{
-                  src: "https://cdn-icons-png.flaticon.com/512/9131/9131478.png",
-                }}
-                description={backendUser.contactNumber || "N/A"}
-                name={backendUser.username}
-              />
-
+              <span className="text-sm font-medium">{backendUser.username}</span>
+              {isCrewMember ? (
+                <>
+                  <span className="text-xs text-default-500">
+                    {backendUser.assignedTruck?.registrationNumber} ({backendUser.assignedTruck?.model})
+                  </span>
+                  <span className="text-xs text-default-500">
+                    {backendUser.assignedTruck?.assignedRoute?.routeName || "N/A"}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-xs text-default-500">
+                    Address: {backendUser.address || "N/A"}
+                  </span>
+                  <span className="text-xs text-default-500">
+                    Contact: {backendUser.contactNumber || "N/A"}
+                  </span>
+                </>
+              )}
             </NavbarItem>
 
             {/* Sign Out */}
             <NavbarItem>
               <Button
-                color='danger'
-                variant='flat'
-                size='sm'
+                color="danger"
+                variant="flat"
+                size="sm"
                 onPress={handleSignOut}
               >
                 Sign Out
@@ -91,15 +114,15 @@ const Header: React.FC = () => {
         ) : (
           <>
             <NavbarItem>
-              <span className='text-sm text-default-500'>Not logged in</span>
+              <span className="text-sm text-default-500">Not logged in</span>
             </NavbarItem>
             <NavbarItem>
               <Button
                 as={Link}
-                href='/login'
-                color='primary'
-                variant='flat'
-                size='sm'
+                href="/login"
+                color="primary"
+                variant="flat"
+                size="sm"
               >
                 Login
               </Button>
@@ -107,10 +130,10 @@ const Header: React.FC = () => {
             <NavbarItem>
               <Button
                 as={Link}
-                href='/register'
-                color='success'
-                variant='flat'
-                size='sm'
+                href="/register"
+                color="success"
+                variant="flat"
+                size="sm"
               >
                 Register
               </Button>

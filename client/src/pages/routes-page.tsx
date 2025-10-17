@@ -49,7 +49,6 @@ const Routes: React.FC = () => {
     try {
       setLoading(true);
       const response = await backend_Path.get("/api/routes/getAll");
-      console.log(response.data);
       setRoutes(response.data);
     } catch (error) {
       console.error("Error fetching routes:", error);
@@ -352,3 +351,4 @@ const Routes: React.FC = () => {
 };
 
 export default Routes;
+// End of routes-page.tsx
