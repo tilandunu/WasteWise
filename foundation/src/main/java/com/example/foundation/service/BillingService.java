@@ -1,17 +1,22 @@
 package com.example.foundation.service;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
 import com.example.foundation.dto.request.ApplyCreditsRequest;
 import com.example.foundation.dto.request.PaymentRequest;
 import com.example.foundation.dto.response.PaymentResponse;
+import com.example.foundation.model.BillingAccount;
 import com.example.foundation.model.PaymentRecord;
+import com.example.foundation.repository.BillingAccountRepository;
 import com.example.foundation.repository.PaymentRecordRepository;
 import com.example.foundation.repository.UserRepository;
-import com.example.foundation.repository.BillingAccountRepository;
-import com.example.foundation.model.BillingAccount;
-import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.*;
 
 @Service
 public class BillingService {
@@ -121,6 +126,24 @@ public class BillingService {
         BillingAccount account = ensureAccount(userId);
         account.setCredits(account.getCredits() + amount);
         billingAccountRepository.save(account);
+    }
+
+    /**
+     * Award credits (LKR) to a user's billing account and create a PaymentRecord note.
+     */
+    public PaymentResponse awardCredits(String userId, double amount, String note) {
+        if (amount <= 0) throw new IllegalArgumentException("Amount must be > 0");
+
+        BillingAccount account = ensureAccount(userId);
+        account.setCredits(account.getCredits() + amount);
+        billingAccountRepository.save(account);
+
+        String txId = "CREDIT-" + UUID.randomUUID();
+        PaymentRecord record = new PaymentRecord(txId, userId, amount, "CREDIT", PaymentRecord.Status.SUCCESS, Instant.now(), note);
+        paymentRecordRepository.save(record);
+        paymentsByUser.get(userId).add(record);
+
+        return new PaymentResponse(txId, "SUCCESS", account.getBalance());
     }
 
 }

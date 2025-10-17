@@ -1,16 +1,20 @@
 package com.example.foundation.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.foundation.dto.request.ApplyCreditsRequest;
 import com.example.foundation.dto.request.PaymentRequest;
 import com.example.foundation.dto.response.PaymentResponse;
-import com.example.foundation.model.PaymentRecord;
 import com.example.foundation.service.BillingService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/billing")
