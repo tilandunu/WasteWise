@@ -15,7 +15,14 @@ public class TagService {
         this.tagRepository = tagRepository;
     }
 
+    // Get all tags
     public List<Tag> getAllTags() {
         return tagRepository.findAll();
+    }
+
+    //Scan tag by tagId
+    public Tag scanTag(String tagId) {
+        return tagRepository.findByTagId(tagId)
+                .orElseThrow(() -> new RuntimeException("Tag not found"));
     }
 }

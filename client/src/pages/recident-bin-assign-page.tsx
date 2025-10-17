@@ -10,7 +10,6 @@ import {
   TableCell,
 } from "@heroui/table";
 import { Button } from "@heroui/button";
-import { Listbox, ListboxItem, ListboxSection } from "@heroui/listbox";
 import { Spinner } from "@heroui/spinner";
 import { Divider } from "@heroui/divider";
 import { Chip } from "@heroui/chip";
@@ -319,8 +318,7 @@ const AllUsersPage: React.FC = () => {
         </CardBody>
       </Card>
 
-      {/* Assign Modal */}
-      {/* Assign Modal */}
+
       {/* Assign Modal */}
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>

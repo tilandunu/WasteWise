@@ -10,6 +10,10 @@ import java.util.List;
 @Repository
 public interface BinRepository extends MongoRepository<Bin, String> {
 
-    @Query("{ 'status': ?0, 'assignedUser': { $exists: false } }")
-    List<Bin> findUnassignedBins(String status);
+    // Find all bins by status
+    @Query("{ 'status': ?0 }")
+    List<Bin> findBinsByStatus(String status);
+
+    // Find all bins
+    List<Bin> findAll();
 }

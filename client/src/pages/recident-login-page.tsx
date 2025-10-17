@@ -25,8 +25,11 @@ const SignInPage: React.FC = () => {
       // Store logged-in user in localStorage
       localStorage.setItem("loggedUser", JSON.stringify(user));
 
-      // Navigate to home page after successful login
-      navigate("/");
+      if (user.assignedTruck != null) {
+        navigate("/crew-portal");
+      } else {
+        navigate("/");
+      }
     } catch (err: any) {
       console.error("Login error:", err);
       setErrorMsg(err.response?.data || "Login failed");

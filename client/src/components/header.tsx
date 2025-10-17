@@ -16,6 +16,14 @@ interface BackendUser {
   username: string;
   address?: string;
   contactNumber?: string;
+  assignedTruck?: {
+    id: string;
+    registrationNumber: string;
+    model: string;
+    assignedRoute?: { id: string; routeName: string; active: boolean };
+    status: string;
+    available: boolean;
+  };
 }
 
 const Header: React.FC = () => {
@@ -24,16 +32,16 @@ const Header: React.FC = () => {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("loggedUser");
-    if (storedUser) {
-      setBackendUser(JSON.parse(storedUser));
-    }
+    if (storedUser) setBackendUser(JSON.parse(storedUser));
   }, []);
 
   const handleSignOut = () => {
-    localStorage.removeItem("backendUser");
+    localStorage.removeItem("loggedUser");
     setBackendUser(null);
     navigate("/login");
   };
+
+  const isCrewMember = !!backendUser?.assignedTruck;
 
   return (
     <HeroUINavbar
@@ -56,10 +64,28 @@ const Header: React.FC = () => {
           <>
             {/* User Info */}
             <NavbarItem className="flex flex-col text-right leading-tight">
-              <span className="text-sm font-medium">
-                {backendUser.username}
-              </span>
+              <span className="text-sm font-medium">{backendUser.username}</span>
+              {isCrewMember ? (
+                <>
+                  <span className="text-xs text-default-500">
+                    {backendUser.assignedTruck?.registrationNumber} ({backendUser.assignedTruck?.model})
+                  </span>
+                  <span className="text-xs text-default-500">
+                    {backendUser.assignedTruck?.assignedRoute?.routeName || "N/A"}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-xs text-default-500">
+                    Address: {backendUser.address || "N/A"}
+                  </span>
+                  <span className="text-xs text-default-500">
+                    Contact: {backendUser.contactNumber || "N/A"}
+                  </span>
+                </>
+              )}
             </NavbarItem>
+
             {/* Sign Out */}
             <NavbarItem>
               <Button
@@ -77,7 +103,6 @@ const Header: React.FC = () => {
             <NavbarItem>
               <span className="text-sm text-default-500">Not logged in</span>
             </NavbarItem>
-
             <NavbarItem>
               <Button
                 as={Link}
@@ -89,7 +114,6 @@ const Header: React.FC = () => {
                 Login
               </Button>
             </NavbarItem>
-
             <NavbarItem>
               <Button
                 as={Link}

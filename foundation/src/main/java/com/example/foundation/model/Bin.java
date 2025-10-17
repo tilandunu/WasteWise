@@ -19,7 +19,7 @@ public class Bin {
     private User assignedUser; 
 
     @DBRef
-    private Tag tag; 
+    private Tag tag;
 
     // --- Auto-generate unique BinCode before saving ---
     @jakarta.persistence.PrePersist

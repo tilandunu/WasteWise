@@ -9,5 +9,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TagRepository extends MongoRepository<Tag, String> {
-    Optional<Tag> findById(String tagId);
+    // Find a tag by its custom tagId field (not Mongo _id)
+    Optional<Tag> findByTagId(String tagId);
 }

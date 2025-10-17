@@ -1,3 +1,4 @@
 foundation/src/main/resources/*
 frontend/.env
 frontend/node_modules
+client/node_modules

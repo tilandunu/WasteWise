@@ -26,4 +26,11 @@ public class TagController {
         List<Tag> tags = tagService.getAllTags();
         return ResponseEntity.ok(tags);
     }
+
+    //Scan tag by tagId
+    @GetMapping("/scan/{tagId}")
+    public ResponseEntity<Tag> scanTag(@PathVariable String tagId) {
+        Tag scannedTag = tagService.scanTag(tagId);
+        return ResponseEntity.ok(scannedTag);
+    }
 }

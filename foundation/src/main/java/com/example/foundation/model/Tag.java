@@ -10,6 +10,8 @@ public class Tag {
     private String id;
     private String tagId; // e.g., QR code or unique identifier
     private boolean active = true; // initially active
+    private float weight = 0.0f;
+    private float fillLevel = 0.0f;
 
     // --- Getters & Setters ---
     public String getId() { return id; }
@@ -20,4 +22,10 @@ public class Tag {
 
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
+
+    public float getWeight() { return weight; }
+    public void setWeight(float weight) { this.weight = weight; }
+
+    public float getFillLevel() { return fillLevel; }
+    public void setFillLevel(float fillLevel) { this.fillLevel = fillLevel; }
 }
