@@ -17,19 +17,10 @@ const Home: React.FC = () => {
             Welcome to <span className="text-primary-600">WasteWise</span>
           </h1>
           <p className="text-default-600 text-lg max-w-2xl mx-auto mb-8">
-            Smart waste management for households, businesses, and municipalities. 
+            Smart waste management for households, businesses, and municipalities.
             Track, manage, and optimize waste collection with real-time digital insights.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button
-              as={Link}
-              href="/register-premises"
-              color="primary"
-              variant="solid"
-              size="lg"
-            >
-              Register Premises
-            </Button>
             <Button
               as={Link}
               href="/assign-bin"
@@ -38,6 +29,15 @@ const Home: React.FC = () => {
               size="lg"
             >
               Go to Dashboard
+            </Button>
+            <Button
+              as={Link}
+              href="/crew-login"
+              color="secondary"
+              variant="flat"
+              size="lg"
+            >
+              Crew Portal
             </Button>
           </div>
         </div>
@@ -55,7 +55,7 @@ const Home: React.FC = () => {
             </CardHeader>
             <CardBody>
               <p className="text-default-500 text-sm">
-                Attach digital tags to bins and monitor fill levels, weight, 
+                Attach digital tags to bins and monitor fill levels, weight,
                 and collection status in real-time.
               </p>
             </CardBody>
@@ -78,7 +78,7 @@ const Home: React.FC = () => {
             </CardHeader>
             <CardBody>
               <p className="text-default-500 text-sm">
-                Gain actionable insights on waste generation, collection frequency, 
+                Gain actionable insights on waste generation, collection frequency,
                 and operational efficiency.
               </p>
             </CardBody>
