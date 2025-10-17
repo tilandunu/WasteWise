@@ -29,7 +29,7 @@ const Home: React.FC = () => {
               variant='flat'
               size='lg'
             >
-              Go to Dashboard
+              Go to Authority Officer Portal
             </Button>
             <Button
               as={Link}
