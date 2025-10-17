@@ -93,17 +93,6 @@ const Header: React.FC = () => {
             {/* Sign Out */}
             <NavbarItem>
               <Button
-                as={Link}
-                href='/billing'
-                color='primary'
-                variant='flat'
-                size='sm'
-              >
-                Billing
-              </Button>
-            </NavbarItem>
-            <NavbarItem>
-              <Button
                 color='danger'
                 variant='flat'
                 size='sm'

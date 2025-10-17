@@ -4,6 +4,7 @@ import Header from '../components/header';
 import { Card, CardHeader, CardBody } from '@heroui/card';
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/react';
+import { Spinner } from '@heroui/spinner';
 
 interface PaymentRecord {
   id: string;
@@ -22,6 +23,7 @@ const BillingPage: React.FC = () => {
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [amount, setAmount] = useState<number>(0);
   const [paying, setPaying] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [applyAmount, setApplyAmount] = useState<number>(0);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +32,7 @@ const BillingPage: React.FC = () => {
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvv, setCardCvv] = useState('');
+  const [cardModalOpen, setCardModalOpen] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem('loggedUser');
@@ -41,6 +44,8 @@ const BillingPage: React.FC = () => {
   }, []);
 
   const fetchSummary = async (uid: string) => {
+    setLoading(true);
+    setError(null);
     try {
       const res = await axios.get(`/api/billing/${uid}`);
       setBalance(res.data.balance ?? 0);
@@ -49,17 +54,23 @@ const BillingPage: React.FC = () => {
     } catch (err) {
       console.error(err);
       setError('Failed to load billing summary');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handlePay = async () => {
-    if (!userId || amount <= 0) {
+    setMessage(null);
+    setError(null);
+    if (!userId) {
+      setError('No user selected');
+      return;
+    }
+    if (amount <= 0) {
       setError('Enter a valid amount to pay');
       return;
     }
     setPaying(true);
-    setError(null);
-    setMessage(null);
     try {
       if (paymentMethod === 'CASH') {
         await axios.post(`/api/billing/${userId}/pay`, {
@@ -70,20 +81,25 @@ const BillingPage: React.FC = () => {
         setMessage('Cash payment recorded.');
       } else {
         // Basic client-side validation for card
-        if (!cardNumber || cardNumber.length < 12) {
+        if (!cardNumber || cardNumber.replace(/\s+/g, '').length < 12) {
           setError('Enter a valid card number');
           setPaying(false);
           return;
         }
         setMessage('Processing card payment...');
-        await new Promise((r) => setTimeout(r, 1200));
-        const masked = cardNumber ? `**** **** **** ${cardNumber.slice(-4)}` : 'CARD';
+        // show modal if not already open so user sees card preview
+        setCardModalOpen(true);
+        await new Promise((r) => setTimeout(r, 900));
+        const masked = cardNumber
+          ? `**** **** **** ${cardNumber.slice(-4)}`
+          : 'CARD';
         await axios.post(`/api/billing/${userId}/pay`, {
           method: 'CARD',
           amount,
           details: `Card ${masked}`,
         });
         setMessage('Card payment processed (mock).');
+        setCardModalOpen(false);
       }
 
       // refresh
@@ -151,21 +167,32 @@ const BillingPage: React.FC = () => {
   };
 
   return (
-    <div className='max-w-4xl mx-auto p-6'>
+    <div className='max-w-full mx-auto p-6'>
       <Header />
-      <Card>
-        <CardHeader className='text-lg font-semibold'>
-          Billing & Rewards
-        </CardHeader>
+      <Card className='mt-10 p-10'>
+        <CardHeader>Billing & Rewards</CardHeader>
         <CardBody>
+          {/* simple toasts */}
           {message && (
-            <div className='p-2 mb-4 bg-success-100 text-success rounded'>
+            <div className='mb-4 bg-success-100 text-success rounded-full px-6 py-4'>
               {message}
             </div>
           )}
           {error && (
-            <div className='p-2 mb-4 bg-danger-100 text-danger rounded'>
+            <div
+              className='p-2 mb-4 bg-danger-100 text-danger rounded'
+              role='alert'
+            >
               {error}
+            </div>
+          )}
+
+          {loading && (
+            <div className='flex items-center gap-2 mb-4'>
+              <Spinner size='sm' />
+              <span className='text-sm text-default-500'>
+                Loading billing summary...
+              </span>
             </div>
           )}
 
@@ -186,37 +213,62 @@ const BillingPage: React.FC = () => {
             </div>
           )}
           {/* Admin: generate monthly invoices (visible to simplicity) */}
-          <div className='mb-4 mt-2 p-2 border rounded'>
-            <h4 className='font-medium'>Admin: Generate Monthly Invoice</h4>
-            <div className='flex gap-2 items-center mt-2'>
+          <div className='mb-4 mt-2 p-6 shadow-medium rounded-3xl bg-default-50'>
+            <div className='flex items-center justify-between'>
+              <h4 className='font-medium'>Admin: Generate Monthly Invoice</h4>
+              <small className='text-default-500'>Admin only</small>
+            </div>
+            <div className='flex gap-2 items-center mt-3'>
               <Input placeholder='Amount (LKR)' value={String(1000)} readOnly />
-              <Button onPress={async () => {
-                if (!confirm('Generate monthly invoice for all users with amount 1000 LKR?')) return;
-                try {
-                  await axios.post('/api/billing/generate-monthly?amount=1000');
-                  alert('Invoices generated');
-                  // refresh visible summary if a user is selected
-                  if (userId) await fetchSummary(userId);
-                } catch (e) {
-                  console.error(e);
-                  alert('Failed to generate invoices');
-                }
-              }}>Generate 1000 LKR</Button>
+              <Button
+                onPress={async () => {
+                  if (
+                    !confirm(
+                      'Generate monthly invoice for all users with amount 1000 LKR?'
+                    )
+                  )
+                    return;
+                  try {
+                    await axios.post(
+                      '/api/billing/generate-monthly?amount=1000'
+                    );
+                    setMessage('Monthly invoices generated for all users.');
+                    // refresh visible summary if a user is selected
+                    if (userId) await fetchSummary(userId);
+                  } catch (e) {
+                    console.error(e);
+                    setError('Failed to generate invoices');
+                  }
+                }}
+                className='px-10'
+              >
+                Generate 1000 LKR
+              </Button>
             </div>
+            <p className='text-sm text-default-500 mt-2'>
+              This creates a pending invoice entry for every user. Payments
+              remain manual.
+            </p>
           </div>
-          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-            <div className='p-4 border rounded'>
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-3'>
+            <div className='p-6 shadow-medium rounded-2xl'>
               <h3 className='text-sm text-default-500'>Balance (LKR)</h3>
-              <p className='text-2xl font-bold'>{balance}</p>
+              <p className='text-2xl font-bold'>{balance.toLocaleString()}</p>
+              <p className='text-sm text-default-400 mt-1'>
+                Outstanding amount
+              </p>
             </div>
-            <div className='p-4 border rounded'>
+            <div className='p-6 shadow-medium rounded-2xl'>
               <h3 className='text-sm text-default-500'>Credits (LKR)</h3>
-              <p className='text-2xl font-bold'>{credits}</p>
+              <p className='text-2xl font-bold'>{credits.toLocaleString()}</p>
+              <p className='text-sm text-default-400 mt-1'>
+                Recyclable credits available
+              </p>
             </div>
-            <div className='p-4 border rounded'>
+            <div className='p-6 shadow-medium rounded-2xl'>
               <h3 className='text-sm text-default-500'>Actions</h3>
-              <div className='space-y-2 mt-2'>
-                <div>
+              <div className='space-y-8 mt-3'>
+                <div className='flex flex-col'>
                   <Input
                     value={String(amount || '')}
                     onChange={(e: any) =>
@@ -224,34 +276,73 @@ const BillingPage: React.FC = () => {
                     }
                     placeholder='Amount to pay'
                     type='number'
+                    aria-label='Amount to pay'
+                    className='border border-default-300 rounded-md w-full mb-2'
                   />
                   <div className='mt-2'>
                     <div className='flex items-center gap-4 mb-2'>
-                      <label className={`cursor-pointer ${paymentMethod === 'CASH' ? 'font-semibold' : ''}`}>
-                        <input type='radio' name='pm' checked={paymentMethod === 'CASH'} onChange={() => setPaymentMethod('CASH')} /> Cash
+                      <label
+                        className={`cursor-pointer ${paymentMethod === 'CASH' ? 'font-semibold' : ''}`}
+                      >
+                        <input
+                          type='radio'
+                          name='pm'
+                          checked={paymentMethod === 'CASH'}
+                          onChange={() => setPaymentMethod('CASH')}
+                        />{' '}
+                        Cash
                       </label>
-                      <label className={`cursor-pointer ${paymentMethod === 'CARD' ? 'font-semibold' : ''}`}>
-                        <input type='radio' name='pm' checked={paymentMethod === 'CARD'} onChange={() => setPaymentMethod('CARD')} /> Card
+                      <label
+                        className={`cursor-pointer ${paymentMethod === 'CARD' ? 'font-semibold' : ''}`}
+                      >
+                        <input
+                          type='radio'
+                          name='pm'
+                          checked={paymentMethod === 'CARD'}
+                          onChange={() => setPaymentMethod('CARD')}
+                        />{' '}
+                        Card
                       </label>
                     </div>
 
                     {paymentMethod === 'CARD' && (
                       <div className='space-y-2 mb-2'>
-                        <Input value={cardNumber} onChange={(e: any) => setCardNumber(e.target.value)} placeholder='Card number' />
                         <div className='flex gap-2'>
-                          <Input value={cardExpiry} onChange={(e: any) => setCardExpiry(e.target.value)} placeholder='MM/YY' />
-                          <Input value={cardCvv} onChange={(e: any) => setCardCvv(e.target.value)} placeholder='CVV' />
+                          <Input
+                            value={cardNumber}
+                            onChange={(e: any) => setCardNumber(e.target.value)}
+                            placeholder='Card number (xxxx xxxx xxxx 1234)'
+                          />
+                        </div>
+                        <div className='flex gap-2'>
+                          <Input
+                            value={cardExpiry}
+                            onChange={(e: any) => setCardExpiry(e.target.value)}
+                            placeholder='MM/YY'
+                          />
+                          <Input
+                            value={cardCvv}
+                            onChange={(e: any) => setCardCvv(e.target.value)}
+                            placeholder='CVV'
+                          />
+                        </div>
+                        <div className='text-sm text-default-500'>
+                          Card data is not stored. This is a mock payment flow.
                         </div>
                       </div>
                     )}
 
-                    <Button className='mt-2' onPress={handlePay} isLoading={paying}>
+                    <Button
+                      className='mt-2 w-full'
+                      onPress={handlePay}
+                      isLoading={paying}
+                    >
                       Pay Now
                     </Button>
                   </div>
                 </div>
 
-                <div>
+                <div className='flex flex-col'>
                   <Input
                     value={String(applyAmount || '')}
                     onChange={(e: any) =>
@@ -259,6 +350,7 @@ const BillingPage: React.FC = () => {
                     }
                     placeholder='Credits to apply'
                     type='number'
+                    className='border border-default-300 rounded-md w-full'
                   />
                   <Button className='mt-2' onPress={handleApply}>
                     Apply Credits
@@ -268,19 +360,65 @@ const BillingPage: React.FC = () => {
             </div>
           </div>
 
-          <div className='mt-6'>
-            <h4 className='font-semibold'>Payment History</h4>
-            <ul className='mt-2 space-y-1'>
-              {payments.map((p) => (
-                <li key={p.id} className='flex justify-between'>
-                  <span>
-                    {p.method} {p.amount} LKR —{' '}
-                    {new Date(p.timestamp).toLocaleString()}
-                  </span>
-                  <span className='text-sm text-default-500'>{p.status}</span>
-                </li>
-              ))}
-            </ul>
+          <div className='mt-20'>
+            <div className='flex items-center justify-between'>
+              <h4 className='font-semibold'>Payment History</h4>
+              <small className='text-sm text-default-500'>
+                {payments.length} records
+              </small>
+            </div>
+
+            <div className='mt-10 border-default-300 rounded'>
+              {/* fixed height scrollable table */}
+              <div className='overflow-y-auto max-h-[260px]'>
+                <table className='w-full text-sm'>
+                  <thead className='py-10'>
+                    <tr className='text-white bg-red-800 sticky top-0 z-50 '>
+                      <th className='px-3 py-2 text-center w-1/4'>Date</th>
+                      <th className='px-3 py-2 text-center w-1/6'>Method</th>
+                      <th className='px-3 py-2 text-center w-1/6'>
+                        Amount (LKR)
+                      </th>
+                      <th className='px-3 py-2 text-center w-1/6'>Status</th>
+                      <th className='px-3 py-2 text-center w-1/6'>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payments.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={5}
+                          className='px-3 py-6 text-center text-default-500'
+                        >
+                          No payment records
+                        </td>
+                      </tr>
+                    )}
+                    {payments.map((p) => (
+                      <tr key={p.id} className='border-t border-default-300'>
+                        <td className='px-3 py-3 align-top text-center '>
+                          {new Date(p.timestamp).toLocaleString()}
+                        </td>
+                        <td className='px-3 py-3 align-top text-center '>
+                          {p.method}
+                        </td>
+                        <td className='px-3 py-3 align-top text-center font-medium '>
+                          {p.amount.toLocaleString()}
+                        </td>
+                        <td className='px-3 py-3 align-top text-center '>
+                          {p.status}
+                        </td>
+                        <td className='px-3 py-3 align-top text-center'>
+                          <Button size='sm' onPress={() => downloadReceipt(p)}>
+                            Download
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </CardBody>
       </Card>
