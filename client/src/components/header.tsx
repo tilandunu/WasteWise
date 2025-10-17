@@ -65,7 +65,7 @@ const Header: React.FC = () => {
             <NavbarItem className="flex flex-col text-right leading-tight">
               <User
                 avatarProps={{
-                  src: "https://i.pravatar.cc/150?u=a04258114e29026702d",
+                  src: "https://cdn-icons-png.flaticon.com/512/9131/9131478.png",
                 }}
                 description={backendUser.contactNumber || "N/A"}
                 name={backendUser.username}
