@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Navbar as HeroUINavbar,
   NavbarBrand,
   NavbarContent,
   NavbarItem,
+
 } from "@heroui/navbar";
 import { Button } from "@heroui/button";
 import { Link } from "@heroui/link";
@@ -32,24 +33,25 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("loggedUser");
+    const storedUser = localStorage.getItem('loggedUser');
     if (storedUser) setBackendUser(JSON.parse(storedUser));
   }, []);
 
   const handleSignOut = () => {
-    localStorage.removeItem("loggedUser");
+    localStorage.removeItem('loggedUser');
     setBackendUser(null);
-    navigate("/login");
+    navigate('/login');
   };
 
   return (
     <HeroUINavbar
       isBordered
-      maxWidth="xl"
-      position="sticky"
-      className="bg-background"
+      maxWidth='xl'
+      position='sticky'
+      className='bg-background'
     >
       {/* Brand Section */}
+
       <NavbarBrand className="flex items-center gap-2">
         <Link href="/" color="foreground" className="flex items-center gap-1">
           <Logo className="h-15 w-15 text-primary" />
@@ -58,10 +60,11 @@ const Header: React.FC = () => {
       </NavbarBrand>
 
       {/* Right Side */}
-      <NavbarContent justify="end" className="flex items-center gap-4">
+      <NavbarContent justify='end' className='flex items-center gap-4'>
         {backendUser ? (
           <>
             {/* User Info */}
+
             <NavbarItem className="flex flex-col text-right leading-tight">
               <User
                 avatarProps={{
@@ -70,14 +73,15 @@ const Header: React.FC = () => {
                 description={backendUser.contactNumber || "N/A"}
                 name={backendUser.username}
               />
+
             </NavbarItem>
 
             {/* Sign Out */}
             <NavbarItem>
               <Button
-                color="danger"
-                variant="flat"
-                size="sm"
+                color='danger'
+                variant='flat'
+                size='sm'
                 onPress={handleSignOut}
               >
                 Sign Out
@@ -87,15 +91,15 @@ const Header: React.FC = () => {
         ) : (
           <>
             <NavbarItem>
-              <span className="text-sm text-default-500">Not logged in</span>
+              <span className='text-sm text-default-500'>Not logged in</span>
             </NavbarItem>
             <NavbarItem>
               <Button
                 as={Link}
-                href="/login"
-                color="primary"
-                variant="flat"
-                size="sm"
+                href='/login'
+                color='primary'
+                variant='flat'
+                size='sm'
               >
                 Login
               </Button>
@@ -103,10 +107,10 @@ const Header: React.FC = () => {
             <NavbarItem>
               <Button
                 as={Link}
-                href="/register"
-                color="success"
-                variant="flat"
-                size="sm"
+                href='/register'
+                color='success'
+                variant='flat'
+                size='sm'
               >
                 Register
               </Button>
