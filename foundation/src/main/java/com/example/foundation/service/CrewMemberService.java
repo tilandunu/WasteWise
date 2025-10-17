@@ -1,7 +1,10 @@
 package com.example.foundation.service;
 
+import com.example.foundation.dto.request.RegisterUserRequest;
 import com.example.foundation.model.CrewMember;
+import com.example.foundation.model.Zone;
 import com.example.foundation.repository.UserRepository;
+import com.example.foundation.repository.ZoneRepository;
 import com.example.foundation.repository.TruckRepository;
 import org.springframework.stereotype.Service;
 
@@ -12,10 +15,12 @@ public class CrewMemberService {
 
     private final UserRepository userRepository;
     private final TruckRepository truckRepository;
+    private final ZoneRepository zoneRepository;
 
-    public CrewMemberService(UserRepository userRepository, TruckRepository truckRepository) {
+    public CrewMemberService(UserRepository userRepository, TruckRepository truckRepository , ZoneRepository zoneRepository)  {
         this.userRepository = userRepository;
         this.truckRepository = truckRepository;
+        this.zoneRepository = zoneRepository;
     }
 
     // 🔹 Get all crew members (filtering from user collection)
@@ -64,6 +69,37 @@ public class CrewMemberService {
         crew.setAvailable(false); // once assigned, not available
         return userRepository.save(crew);
     }
+
+
+
+    public CrewMember registerCrewMember(RegisterUserRequest request) {
+
+        // Check if username already exists
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+
+        // Fetch Zone
+        Zone zone = zoneRepository.findById(request.getZoneId())
+                .orElseThrow(() -> new RuntimeException("Zone not found"));
+
+        // Create new CrewMember
+        CrewMember newCrew = new CrewMember(
+                request.getUsername(),
+                request.getPassword(),
+                request.getAddress(),
+                request.getContactNumber()
+        );
+
+        newCrew.setZone(zone);
+        newCrew.setAvailable(true);
+        newCrew.setActivated(false);
+        newCrew.setAssignedTruck(null); // initially unassigned
+
+        return userRepository.save(newCrew);
+    }
+
+
 
     // 🔹 Unassign truck
     public CrewMember unassignTruck(String crewId) {

@@ -2,10 +2,8 @@ package com.example.foundation.service;
 
 import com.example.foundation.dto.request.RegisterUserRequest;
 import com.example.foundation.model.Resident;
-import com.example.foundation.model.CrewMember;
-import com.example.foundation.model.Zone;
 import com.example.foundation.repository.UserRepository;
-import com.example.foundation.repository.ZoneRepository;
+import com.example.foundation.service.registration.UserRegistrationStrategy;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,69 +15,22 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final ZoneRepository zoneRepository;
+    private final List<UserRegistrationStrategy> registrationStrategies;
 
-    public UserService(UserRepository userRepository, ZoneRepository zoneRepository) {
+    public UserService(UserRepository userRepository, List<UserRegistrationStrategy> registrationStrategies) {
         this.userRepository = userRepository;
-        this.zoneRepository = zoneRepository;
+        this.registrationStrategies = registrationStrategies;
     }
 
-    // --- Register Resident ---
-    public String registerResident(RegisterUserRequest request) {
+    // Register
+    public String registerUser(RegisterUserRequest request) {
+        String role = request.getUserRole();
 
-        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new IllegalArgumentException("Username already exists");
-        }
-
-        Zone zone = zoneRepository.findById(request.getZoneId())
-                .orElseThrow(() -> new RuntimeException("Zone not found"));
-
-        Resident newUser = new Resident(
-                request.getUsername(),
-                request.getPassword(),
-                request.getAddress(),
-                request.getContactNumber()
-        );
-
-        newUser.setZone(zone);
-        newUser.setActivated(false);
-
-        // Set premises type if provided
-        if (request.getPremisesType() != null) {
-            try {
-                newUser.setPremisesType(Resident.PremisesType.valueOf(request.getPremisesType().toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid premises type");
-            }
-        }
-
-        userRepository.save(newUser);
-        return "User registered successfully. Await activation.";
-    }
-
-    // --- Register Crew Member ---
-    public CrewMember registerCrewMember(RegisterUserRequest request) {
-
-        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new IllegalArgumentException("Username already exists");
-        }
-
-        Zone zone = zoneRepository.findById(request.getZoneId())
-                .orElseThrow(() -> new RuntimeException("Zone not found"));
-
-        CrewMember newCrew = new CrewMember(
-                request.getUsername(),
-                request.getPassword(),
-                request.getAddress(),
-                request.getContactNumber()
-        );
-
-        newCrew.setZone(zone);
-        newCrew.setAvailable(true);
-        newCrew.setActivated(false);
-        newCrew.setAssignedTruck(null);
-
-        return userRepository.save(newCrew);
+        return registrationStrategies.stream()
+                .filter(strategy -> strategy.supports(role))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unsupported user role: " + role))
+                .register(request);
     }
 
     // --- Login ---
@@ -95,7 +46,8 @@ public class UserService {
             throw new IllegalArgumentException("Invalid credentials");
 
         // Uncomment if activation is required:
-        // if (!user.isActivated()) throw new IllegalStateException("User not activated");
+        // if (!user.isActivated()) throw new IllegalStateException("User not
+        // activated");
 
         return user;
     }

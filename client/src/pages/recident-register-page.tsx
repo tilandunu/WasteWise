@@ -18,6 +18,7 @@ const RegisterPage: React.FC = () => {
     contactNumber: "",
     zoneId: "",
     premisesType: "HOUSE", // default value
+    userRole: "RESIDENT",
   });
 
   const [zones, setZones] = useState<Zone[]>([]);

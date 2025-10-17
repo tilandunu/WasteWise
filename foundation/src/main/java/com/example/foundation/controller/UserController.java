@@ -2,14 +2,12 @@ package com.example.foundation.controller;
 
 import com.example.foundation.dto.request.RegisterUserRequest;
 import com.example.foundation.model.Resident;
-import com.example.foundation.model.CrewMember;
 import com.example.foundation.service.UserService;
 
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @RequestMapping("/api/users")
@@ -24,22 +22,12 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterUserRequest request) {
         try {
-            String message = userService.registerResident(request);
+            String message = userService.registerUser(request);
             return ResponseEntity.ok(message);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (RuntimeException e) {
             return ResponseEntity.internalServerError().body(e.getMessage());
-        }
-    }
-
-    @PostMapping("/register-crew")
-    public ResponseEntity<?> registerCrewMember(@RequestBody RegisterUserRequest request) {
-        try {
-            CrewMember crew = userService.registerCrewMember(request);
-            return ResponseEntity.ok(crew);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

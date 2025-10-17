@@ -1,5 +1,6 @@
 package com.example.foundation.controller;
 
+import com.example.foundation.dto.request.RegisterUserRequest;
 import com.example.foundation.model.CrewMember;
 import com.example.foundation.service.CrewMemberService;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +14,6 @@ public class CrewMemberController {
 
     // Dependencies
     private final CrewMemberService crewMemberService;
-
 
     // Constructor
     public CrewMemberController(CrewMemberService crewMemberService) {
@@ -60,4 +60,5 @@ public class CrewMemberController {
         CrewMember updatedCrew = crewMemberService.unassignTruck(crewId);
         return ResponseEntity.ok(updatedCrew);
     }
+
 }
