@@ -9,8 +9,11 @@ import java.util.List;
 @Service
 public class ZoneService {
 
+    // Inject ZoneRepository
     private final ZoneRepository zoneRepository;
 
+
+    // Constructor
     public ZoneService(ZoneRepository zoneRepository) {
         this.zoneRepository = zoneRepository;
     }

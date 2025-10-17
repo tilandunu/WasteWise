@@ -11,8 +11,11 @@ import java.util.List;
 @RequestMapping("/api/crew")
 public class CrewMemberController {
 
+    // Dependencies
     private final CrewMemberService crewMemberService;
 
+
+    // Constructor
     public CrewMemberController(CrewMemberService crewMemberService) {
         this.crewMemberService = crewMemberService;
     }
