@@ -2,9 +2,11 @@ package com.example.foundation.controller;
 
 import com.example.foundation.dto.request.RegisterUserRequest;
 import com.example.foundation.model.Resident;
+import com.example.foundation.model.CrewMember;
 import com.example.foundation.model.Zone;
 import com.example.foundation.repository.UserRepository;
 import com.example.foundation.repository.ZoneRepository;
+
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -57,6 +59,39 @@ public class UserController {
         return ResponseEntity.ok("User registered successfully. Await activation.");
     }
 
+    // --- Crew Member Registration ---
+    @PostMapping("/register-crew")
+    public ResponseEntity<?> registerCrewMember(@RequestBody RegisterUserRequest request) {
+        
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            return ResponseEntity.badRequest().body("Username already exists");
+        }
+
+        // Fetch Zone by ID
+        Zone zone = zoneRepository.findById(request.getZoneId())
+                .orElseThrow(() -> new RuntimeException("Zone not found"));
+
+        // Create Crew Member
+        CrewMember newCrew = new CrewMember(
+                request.getUsername(),
+                request.getPassword(),
+                request.getAddress(),
+                request.getContactNumber()
+        );
+
+        newCrew.setZone(zone);
+        newCrew.setAvailable(true);
+        newCrew.setActivated(false);
+        
+        // Explicitly set assignedTruck to null (new crew members start unassigned)
+        newCrew.setAssignedTruck(null);
+
+        // Save using userRepository instead of crewRepository
+        CrewMember savedCrew = userRepository.save(newCrew);
+        
+        return ResponseEntity.ok(savedCrew );
+    }
+
     // --- Login ---
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Resident loginRequest) {
@@ -69,8 +104,7 @@ public class UserController {
         if (!user.getPassword().equals(loginRequest.getPassword()))
             return ResponseEntity.status(401).body("Invalid credentials");
 
-        // if (!user.isActivated()) return ResponseEntity.status(403).body("User not
-        // activated");
+        // if (!user.isActivated()) return ResponseEntity.status(403).body("User not activated");
 
         return ResponseEntity.ok(user);
     }

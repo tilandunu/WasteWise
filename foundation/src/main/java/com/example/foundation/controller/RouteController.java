@@ -2,7 +2,8 @@ package com.example.foundation.controller;
 
 import com.example.foundation.model.Route;
 import com.example.foundation.service.RouteService;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,49 +12,72 @@ import java.util.List;
 @RequestMapping("/api/routes")
 public class RouteController {
 
-    @Autowired
-    private RouteService routeService;
+    private final RouteService routeService;
 
-    @GetMapping
-    public List<Route> getAllRoutes() {
-        return routeService.getAllRoutes();
+    public RouteController(RouteService routeService) {
+        this.routeService = routeService;
     }
 
+    // --- Get all routes ---
+    @GetMapping("getAll")
+    public ResponseEntity<List<Route>> getAllRoutes() {
+        return ResponseEntity.ok(routeService.getAllRoutes());
+    }
+
+    // --- Get a single route ---
     @GetMapping("/{id}")
-    public Route getRouteById(@PathVariable String id) {
-        return routeService.getRouteById(id).orElseThrow(() -> new RuntimeException("Route not found"));
+    public ResponseEntity<?> getRouteById(@PathVariable String id) {
+        return routeService.getRouteById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public Route createRoute(@RequestBody Route route) {
-        return routeService.createRoute(route);
+    // --- Create route ---
+    @PostMapping("create")
+    public ResponseEntity<Route> createRoute(@RequestBody Route route) {
+        Route createdRoute = routeService.createRoute(route);
+        return ResponseEntity.ok(createdRoute);
     }
 
+    // --- Update route ---
     @PutMapping("/{id}")
-    public Route updateRoute(@PathVariable String id, @RequestBody Route route) {
-        return routeService.updateRoute(id, route);
+    public ResponseEntity<?> updateRoute(@PathVariable String id, @RequestBody Route updatedRoute) {
+        try {
+            Route route = routeService.updateRoute(id, updatedRoute);
+            return ResponseEntity.ok(route);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
+    // --- Delete route ---
     @DeleteMapping("/{id}")
-    public void deleteRoute(@PathVariable String id) {
-        routeService.deleteRoute(id);
+    public ResponseEntity<?> deleteRoute(@PathVariable String id) {
+        try {
+            routeService.deleteRoute(id);
+            return ResponseEntity.ok("Route deleted successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    // Assign zone to route
-    @PostMapping("/{routeId}/assign-zone/{zoneId}")
-    public Route assignZone(@PathVariable String routeId, @PathVariable String zoneId) {
-        return routeService.assignZoneToRoute(routeId, zoneId);
+    // --- Assign truck to route ---
+    @PutMapping("/{routeId}/assign-truck/{truckId}")
+    public ResponseEntity<?> assignTruck(@PathVariable String routeId, @PathVariable String truckId) {
+        Route updatedRoute = routeService.assignTruck(routeId, truckId);
+        return ResponseEntity.ok(updatedRoute);
     }
 
-    // Get active routes
+    // --- Unassign truck from route ---
+    @PutMapping("/{routeId}/unassign-truck/{truckId}")
+    public ResponseEntity<?> unassignTruck(@PathVariable String routeId, @PathVariable String truckId) {
+        Route updatedRoute = routeService.unassignTruck(routeId, truckId);
+        return ResponseEntity.ok(updatedRoute);
+    }
+
+    // --- Get active routes ---
     @GetMapping("/active")
-    public List<Route> getActiveRoutes() {
-        return routeService.getActiveRoutes();
-    }
-
-    // Get routes by zone
-    @GetMapping("/zone/{zoneId}")
-    public List<Route> getRoutesByZone(@PathVariable String zoneId) {
-        return routeService.getRoutesByZone(zoneId);
+    public ResponseEntity<List<Route>> getActiveRoutes() {
+        return ResponseEntity.ok(routeService.getActiveRoutes());
     }
 }

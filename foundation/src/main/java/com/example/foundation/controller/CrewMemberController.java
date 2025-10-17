@@ -2,7 +2,7 @@ package com.example.foundation.controller;
 
 import com.example.foundation.model.CrewMember;
 import com.example.foundation.service.CrewMemberService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,55 +11,50 @@ import java.util.List;
 @RequestMapping("/api/crew")
 public class CrewMemberController {
 
-    @Autowired
-    private CrewMemberService crewService;
+    private final CrewMemberService crewMemberService;
 
-    // --- Get all crew members ---
-    @GetMapping
-    public List<CrewMember> getAllCrew() {
-        return crewService.getAllCrew();
+    public CrewMemberController(CrewMemberService crewMemberService) {
+        this.crewMemberService = crewMemberService;
     }
 
-    // --- Get crew by ID ---
-    @GetMapping("/{id}")
-    public CrewMember getCrewById(@PathVariable String id) {
-        return crewService.getCrewById(id)
-                .orElseThrow(() -> new RuntimeException("Crew member not found"));
+    // 🔹 Get all crew members
+    @GetMapping("/crew-members")
+    public ResponseEntity<List<CrewMember>> getAllCrewMembers() {
+        List<CrewMember> crewList = crewMemberService.getAllCrewMembers();
+        return ResponseEntity.ok(crewList);
     }
 
-    // --- Create new crew member ---
-    @PostMapping("/create")
-    public CrewMember createCrew(@RequestBody CrewMember crew) {
-        return crewService.createCrew(crew);
-    }
-
-    // --- Update existing crew member ---
-    @PutMapping("/{id}")
-    public CrewMember updateCrew(@PathVariable String id, @RequestBody CrewMember updatedCrew) {
-        return crewService.updateCrew(id, updatedCrew);
-    }
-
-    // --- Delete crew member ---
-    @DeleteMapping("/{id}")
-    public void deleteCrew(@PathVariable String id) {
-        crewService.deleteCrew(id);
-    }
-
-    // --- Assign truck to crew ---
-    @PostMapping("/{crewId}/assign-truck/{truckId}")
-    public CrewMember assignTruck(@PathVariable String crewId, @PathVariable String truckId) {
-        return crewService.assignTruck(crewId, truckId);
-    }
-
-    // --- Unassign truck from crew ---
-    @PostMapping("/{crewId}/unassign-truck")
-    public CrewMember unassignTruck(@PathVariable String crewId) {
-        return crewService.unassignTruck(crewId);
-    }
-
-    // --- Get available crew members ---
+    // 🔹 Get all available crew members
     @GetMapping("/available")
-    public List<CrewMember> getAvailableCrew() {
-        return crewService.getAvailableCrew();
+    public ResponseEntity<List<CrewMember>> getAvailableCrew() {
+        List<CrewMember> availableCrew = crewMemberService.getAvailableCrewMembers();
+        return ResponseEntity.ok(availableCrew);
+    }
+
+    // 🔹 Update availability
+    @PutMapping("/{crewId}/availability")
+    public ResponseEntity<CrewMember> updateAvailability(
+            @PathVariable String crewId,
+            @RequestParam boolean available) {
+
+        CrewMember updatedCrew = crewMemberService.updateAvailability(crewId, available);
+        return ResponseEntity.ok(updatedCrew);
+    }
+
+    // 🔹 Assign truck to crew member
+    @PutMapping("/{crewId}/assign-truck/{truckId}")
+    public ResponseEntity<CrewMember> assignTruck(
+            @PathVariable String crewId,
+            @PathVariable String truckId) {
+
+        CrewMember updatedCrew = crewMemberService.assignTruck(crewId, truckId);
+        return ResponseEntity.ok(updatedCrew);
+    }
+
+    // 🔹 Unassign truck
+    @PutMapping("/{crewId}/unassign-truck")
+    public ResponseEntity<CrewMember> unassignTruck(@PathVariable String crewId) {
+        CrewMember updatedCrew = crewMemberService.unassignTruck(crewId);
+        return ResponseEntity.ok(updatedCrew);
     }
 }

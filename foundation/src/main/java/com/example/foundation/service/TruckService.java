@@ -1,12 +1,8 @@
 package com.example.foundation.service;
 
-import com.example.foundation.model.CrewMember;
-import com.example.foundation.model.Route;
 import com.example.foundation.model.Truck;
-import com.example.foundation.repository.CrewMemberRepository;
-import com.example.foundation.repository.RouteRepository;
+import com.example.foundation.model.Route;
 import com.example.foundation.repository.TruckRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,96 +11,66 @@ import java.util.Optional;
 @Service
 public class TruckService {
 
-    @Autowired
-    private TruckRepository truckRepository;
+    private final TruckRepository truckRepository;
 
-    @Autowired
-    private CrewMemberRepository crewRepository;
+    public TruckService(TruckRepository truckRepository) {
+        this.truckRepository = truckRepository;
+    }
 
-    @Autowired
-    private RouteRepository routeRepository;
-
-    // --- CRUD Operations ---
+    // 🔹 Get all trucks
     public List<Truck> getAllTrucks() {
         return truckRepository.findAll();
     }
 
+    // 🔹 Get truck by ID
     public Optional<Truck> getTruckById(String id) {
         return truckRepository.findById(id);
     }
 
+    // 🔹 Create new truck
     public Truck createTruck(Truck truck) {
         return truckRepository.save(truck);
     }
 
+    // 🔹 Update truck
     public Truck updateTruck(String id, Truck updatedTruck) {
-        return truckRepository.findById(id).map(truck -> {
-            truck.setRegistrationNumber(updatedTruck.getRegistrationNumber());
-            truck.setModel(updatedTruck.getModel());
-            truck.setStatus(updatedTruck.getStatus());
-            truck.setAssignedRoute(updatedTruck.getAssignedRoute());
-            truck.setAssignedCrew(updatedTruck.getAssignedCrew());
-            return truckRepository.save(truck);
-        }).orElseThrow(() -> new RuntimeException("Truck not found"));
+        Truck existingTruck = truckRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Truck not found"));
+
+        existingTruck.setRegistrationNumber(updatedTruck.getRegistrationNumber());
+        existingTruck.setModel(updatedTruck.getModel());
+        existingTruck.setStatus(updatedTruck.getStatus());
+        existingTruck.setAssignedRoute(updatedTruck.getAssignedRoute());
+        existingTruck.setAssignedCrew(updatedTruck.getAssignedCrew());
+
+        return truckRepository.save(existingTruck);
     }
 
+    // 🔹 Delete truck
     public void deleteTruck(String id) {
         truckRepository.deleteById(id);
     }
 
-    // --- Assign Crew to Truck ---
-    public Truck assignCrewToTruck(String truckId, String crewId) {
+    // 🔹 Assign a route to a truck
+    public Truck assignRoute(String truckId, Route route) {
         Truck truck = truckRepository.findById(truckId)
                 .orElseThrow(() -> new RuntimeException("Truck not found"));
-
-        CrewMember crew = crewRepository.findById(crewId)
-                .orElseThrow(() -> new RuntimeException("Crew member not found"));
-
-        if (!truck.getAssignedCrew().contains(crew)) {
-            truck.getAssignedCrew().add(crew);
-            crew.setAssignedTruck(truck);
-            crewRepository.save(crew);
-        }
-
-        return truckRepository.save(truck);
-    }
-
-    public Truck removeCrewFromTruck(String truckId, String crewId) {
-        Truck truck = truckRepository.findById(truckId)
-                .orElseThrow(() -> new RuntimeException("Truck not found"));
-
-        truck.getAssignedCrew().removeIf(c -> c.getId().equals(crewId));
-
-        crewRepository.findById(crewId).ifPresent(crew -> {
-            crew.setAssignedTruck(null);
-            crewRepository.save(crew);
-        });
-
-        return truckRepository.save(truck);
-    }
-
-    // --- Assign Route to Truck ---
-    public Truck assignRouteToTruck(String truckId, String routeId) {
-        Truck truck = truckRepository.findById(truckId)
-                .orElseThrow(() -> new RuntimeException("Truck not found"));
-
-        Route route = routeRepository.findById(routeId)
-                .orElseThrow(() -> new RuntimeException("Route not found"));
-
         truck.setAssignedRoute(route);
+        truck.setStatus("Assigned");
         return truckRepository.save(truck);
     }
 
-    // --- Query Methods ---
-    public List<Truck> getTrucksByStatus(String status) {
-        return truckRepository.findByStatus(status);
+    // 🔹 Unassign a route
+    public Truck unassignRoute(String truckId) {
+        Truck truck = truckRepository.findById(truckId)
+                .orElseThrow(() -> new RuntimeException("Truck not found"));
+        truck.setAssignedRoute(null);
+        truck.setStatus("Available");
+        return truckRepository.save(truck);
     }
 
+    // 🔹 Get trucks by route ID (custom finder)
     public List<Truck> getTrucksByRoute(String routeId) {
-        return truckRepository.findByAssignedRoute_Id(routeId); // Changed from findByRoute_Id
-    }
-
-    public List<Truck> getTrucksByCrew(String crewId) {
-        return truckRepository.findByAssignedCrew_Id(crewId);
+        return truckRepository.findByAssignedRoute_Id(routeId);
     }
 }
