@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "../config/axiosInstance"; // Axios instance pointing to backend
+import axios from "../config/axiosInstance";
+import { Card, CardHeader, CardBody } from "@heroui/card";
+import { Input } from "@heroui/react";
+import { Button } from "@heroui/button";
+import { Divider } from "@heroui/divider";
+import  Header from "../components/header";
 
 const SignInPage: React.FC = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
@@ -18,11 +23,9 @@ const SignInPage: React.FC = () => {
     setErrorMsg("");
 
     try {
-      // Call backend login endpoint
       const res = await axios.post("/api/users/login", formData);
       const user = res.data;
 
-      // Store logged-in user in localStorage
       localStorage.setItem("loggedUser", JSON.stringify(user));
 
       if (user.assignedTruck != null) {
@@ -39,55 +42,67 @@ const SignInPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-gray-100">
-      <div className="w-full max-w-md bg-white p-6 rounded shadow">
-        <h2 className="text-xl font-semibold mb-4 text-center">Sign In</h2>
+    <>
+      <Header />
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <Card shadow="lg" className="w-full max-w-md p-6">
+          <CardHeader className="text-center">
+            <h2 className="text-2xl font-bold">Sign In to WasteWise</h2>
+          </CardHeader>
 
-        {errorMsg && (
-          <p className="text-red-600 mb-4 text-center">{errorMsg}</p>
-        )}
+          <Divider className="my-4" />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={formData.username}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
+          {errorMsg && (
+            <p className="text-red-600 mb-4 text-center">{errorMsg}</p>
+          )}
 
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
+          <CardBody>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input
+                label="Username"
+                placeholder="Enter your username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                required
+              />
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-          >
-            {loading ? "Signing in..." : "Sign In"}
-          </button>
-        </form>
+              <Input
+                label="Password"
+                type="password"
+                placeholder="Enter your password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
 
-        <p className="mt-4 text-center text-sm text-gray-600">
-          Don't have an account?{" "}
-          <button
-            className="text-blue-600 hover:underline"
-            onClick={() => navigate("/register")}
-          >
-            Register here
-          </button>
-        </p>
+              <Button
+                type="submit"
+                color="primary"
+                size="lg"
+                className="w-full"
+                isLoading={loading}
+              >
+                {loading ? "Signing in..." : "Sign In"}
+              </Button>
+            </form>
+
+            <p className="mt-4 text-center text-sm text-default-500">
+              Don't have an account?{" "}
+              <Button
+                variant="flat"
+                color="secondary"
+                size="sm"
+                onPress={() => navigate("/register")}
+              >
+                Register here
+              </Button>
+            </p>
+          </CardBody>
+        </Card>
       </div>
-    </div>
+    </>
   );
 };
 

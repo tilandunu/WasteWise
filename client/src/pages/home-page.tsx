@@ -1,8 +1,7 @@
 import React from "react";
 import { Button } from "@heroui/button";
-import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
+import { Card, CardHeader, CardBody, } from "@heroui/card";
 import { Link } from "@heroui/link";
-import { Divider } from "@heroui/divider";
 import Header from "../components/header";
 
 const Home: React.FC = () => {
@@ -11,24 +10,23 @@ const Home: React.FC = () => {
       {/* HeroUI Header */}
       <Header />
 
-      {/* Page Content */}
-      <main className="max-w-5xl mx-auto px-4 py-10 text-center">
-        <section className="flex flex-col items-center justify-center gap-6">
-          <h1 className="text-4xl font-bold tracking-tight">
-            Welcome to <span className="text-primary">My App</span>
+      {/* Hero Section */}
+      <section className="bg-primary-50 py-20">
+        <div className="max-w-5xl mx-auto px-4 text-center">
+          <h1 className="text-5xl font-bold text-primary mb-4">
+            Welcome to <span className="text-primary-600">WasteWise</span>
           </h1>
-          <p className="text-default-500 max-w-md">
-            Manage your premises, users, and account settings all in one place.
-            Built with HeroUI and Vite for a fast, modern experience.
+          <p className="text-default-600 text-lg max-w-2xl mx-auto mb-8">
+            Smart waste management for households, businesses, and municipalities. 
+            Track, manage, and optimize waste collection with real-time digital insights.
           </p>
-
-          <div className="flex gap-4 mt-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button
               as={Link}
               href="/register-premises"
               color="primary"
               variant="solid"
-              size="md"
+              size="lg"
             >
               Register Premises
             </Button>
@@ -37,67 +35,108 @@ const Home: React.FC = () => {
               href="/assign-bin"
               color="secondary"
               variant="flat"
-              size="md"
+              size="lg"
             >
               Go to Dashboard
             </Button>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <Divider className="my-10" />
-
-        <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Example Feature Cards */}
+      {/* Features Section */}
+      <section className="max-w-6xl mx-auto px-4 py-20">
+        <h2 className="text-3xl font-bold text-center mb-12">
+          Why WasteWise?
+        </h2>
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           <Card shadow="sm" isPressable>
             <CardHeader className="font-semibold text-lg">
-              Quick Registration
+              Smart Bin Tracking
             </CardHeader>
             <CardBody>
               <p className="text-default-500 text-sm">
-                Easily register new premises and manage existing ones from a
-                single dashboard.
+                Attach digital tags to bins and monitor fill levels, weight, 
+                and collection status in real-time.
               </p>
             </CardBody>
-            <CardFooter>
-              <Link href="/assign-bin" color="primary">
-                Learn more →
-              </Link>
-            </CardFooter>
           </Card>
 
           <Card shadow="sm" isPressable>
             <CardHeader className="font-semibold text-lg">
-              User Management
+              Crew & Route Management
             </CardHeader>
             <CardBody>
               <p className="text-default-500 text-sm">
-                Keep track of your users, update details, and manage permissions
-                seamlessly.
+                Assign trucks and crews to optimized routes for efficient waste collection.
               </p>
             </CardBody>
-            <CardFooter>
-              <Link href="/users" color="primary">
-                View users →
-              </Link>
-            </CardFooter>
           </Card>
 
           <Card shadow="sm" isPressable>
-            <CardHeader className="font-semibold text-lg">Secure Access</CardHeader>
+            <CardHeader className="font-semibold text-lg">
+              Analytics & Insights
+            </CardHeader>
             <CardBody>
               <p className="text-default-500 text-sm">
-                Built with modern authentication to keep your data safe and
-                accessible only to authorized users.
+                Gain actionable insights on waste generation, collection frequency, 
+                and operational efficiency.
               </p>
             </CardBody>
-            <CardFooter>
-              <Link href="/login" color="primary">
-                Sign in →
-              </Link>
-            </CardFooter>
           </Card>
-        </section>
-      </main>
+
+          <Card shadow="sm" isPressable>
+            <CardHeader className="font-semibold text-lg">
+              Eco-Friendly Impact
+            </CardHeader>
+            <CardBody>
+              <p className="text-default-500 text-sm">
+                Reduce overflow, optimize collections, and promote sustainable waste management.
+              </p>
+            </CardBody>
+          </Card>
+
+          <Card shadow="sm" isPressable>
+            <CardHeader className="font-semibold text-lg">
+              Secure & Reliable
+            </CardHeader>
+            <CardBody>
+              <p className="text-default-500 text-sm">
+                Your data is safe with role-based access, secure authentication, and robust cloud storage.
+              </p>
+            </CardBody>
+          </Card>
+
+          <Card shadow="sm" isPressable>
+            <CardHeader className="font-semibold text-lg">
+              Easy Setup
+            </CardHeader>
+            <CardBody>
+              <p className="text-default-500 text-sm">
+                Quick onboarding for households, businesses, and municipal partners.
+              </p>
+            </CardBody>
+          </Card>
+        </div>
+      </section>
+
+      {/* Call to Action Section */}
+      <section className="bg-primary-50 py-20">
+        <div className="max-w-3xl mx-auto text-center px-4">
+          <h2 className="text-3xl font-bold mb-4">Ready to manage your waste smarter?</h2>
+          <p className="text-default-600 mb-6">
+            Join WasteWise today and revolutionize the way you track and manage waste collection.
+          </p>
+          <Button
+            as={Link}
+            href="/register"
+            color="primary"
+            variant="solid"
+            size="lg"
+          >
+            Get Started Now
+          </Button>
+        </div>
+      </section>
     </>
   );
 };

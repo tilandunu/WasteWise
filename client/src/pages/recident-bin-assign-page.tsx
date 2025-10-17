@@ -13,7 +13,7 @@ import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
 import { Divider } from "@heroui/divider";
 import { Chip } from "@heroui/chip";
-import { Input, useDisclosure } from "@heroui/react";
+import { Input } from "@heroui/react";
 import {
   Modal,
   ModalContent,
@@ -23,6 +23,7 @@ import {
 } from "@heroui/modal";
 import { Switch } from "@heroui/switch";
 import Header from "../components/header";
+
 interface Zone {
   id: string;
   name: string;
@@ -60,9 +61,8 @@ const AllUsersPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Validation states per user
   const [validationStates, setValidationStates] = useState<
-    Record<string, { validated: boolean; validating: boolean; failed: boolean }>
+    Record<string, { validated: boolean; failed: boolean }>
   >({});
 
   const [assigningUserId, setAssigningUserId] = useState<string | null>(null);
@@ -73,20 +73,15 @@ const AllUsersPage: React.FC = () => {
   const [binSearch, setBinSearch] = useState("");
   const [tagSearch, setTagSearch] = useState("");
 
-  const { isOpen, onOpen, onOpenChange } = useDisclosure(); // assign modal
-  const {
-    isOpen: msgOpen,
-    onOpen: openMsgModal,
-    onOpenChange: onMsgModalChange,
-  } = useDisclosure(); // validation modal
-  const {
-    isOpen: successOpen,
-    onOpen: openSuccessModal,
-    onOpenChange: onSuccessModalChange,
-  } = useDisclosure(); // assign success modal
+  // 🧩 Explicit modal states (reliable)
+  const [validateLoading, setValidateLoading] = useState(false);
+  const [overrideLoading, setOverrideLoading] = useState(false);
+  const [resultOpen, setResultOpen] = useState(false);
+  const [assignOpen, setAssignOpen] = useState(false);
 
-  const [validationMessage, setValidationMessage] = useState("");
-  const [validationSuccess, setValidationSuccess] = useState(false);
+  const [resultMessage, setResultMessage] = useState("");
+  const [resultSuccess, setResultSuccess] = useState(false);
+  const [resultImage, setResultImage] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -109,48 +104,64 @@ const AllUsersPage: React.FC = () => {
     fetchData();
   }, []);
 
+  // ✅ Always close all modals before opening a new one
+  const closeAllModals = () => {
+    setValidateLoading(false);
+    setOverrideLoading(false);
+    setResultOpen(false);
+    setAssignOpen(false);
+  };
+
+  // ✅ Validation flow
   const handleValidate = (userId: string) => {
-    setValidationStates((prev) => ({
-      ...prev,
-      [userId]: { validated: false, validating: true, failed: false },
-    }));
+    closeAllModals();
+    setValidateLoading(true); // show spinner
 
     setTimeout(() => {
+      setValidateLoading(false); // stop spinner first
+
       if (forceFail) {
-        // Validation failed
         setValidationStates((prev) => ({
           ...prev,
-          [userId]: { validated: false, validating: false, failed: true },
+          [userId]: { validated: false, failed: true },
         }));
-        setValidationSuccess(false);
-        setValidationMessage("❌ Zone or address validation failed.");
+        setResultSuccess(false);
+        setResultMessage("❌ Zone validation failed. Try again or override manually.");
+        setResultImage("https://via.placeholder.com/300x180.png?text=Validation+Failed");
       } else {
-        // Validation passed
         setValidationStates((prev) => ({
           ...prev,
-          [userId]: { validated: true, validating: false, failed: false },
+          [userId]: { validated: true, failed: false },
         }));
-        setValidationSuccess(true);
-        setValidationMessage(
-          "✅ Validation successful! You can assign a bin now."
-        );
+        setResultSuccess(true);
+        setResultMessage("✅ Zone validated successfully!");
+        setResultImage("https://via.placeholder.com/300x180.png?text=Validation+Success");
       }
-      openMsgModal();
-    }, 1000);
+
+      setTimeout(() => setResultOpen(true), 200);
+    }, 3000);
   };
 
+  // ✅ Override flow
   const handleOverride = (userId: string) => {
-    setValidationStates((prev) => ({
-      ...prev,
-      [userId]: { validated: true, validating: false, failed: false },
-    }));
-    setValidationSuccess(true);
-    setValidationMessage(
-      "⚠️ Validation overridden manually. Proceed with caution."
-    );
-    openMsgModal();
+    closeAllModals();
+    setOverrideLoading(true);
+
+    setTimeout(() => {
+      setOverrideLoading(false); // stop spinner
+      setValidationStates((prev) => ({
+        ...prev,
+        [userId]: { validated: true, failed: false },
+      }));
+      setResultSuccess(true);
+      setResultMessage("⚠️ Validation manually overridden. Proceed with caution.");
+      setResultImage("https://via.placeholder.com/300x180.png?text=Manual+Override");
+
+      setTimeout(() => setResultOpen(true), 200);
+    }, 3000);
   };
 
+  // ✅ Assign logic unchanged
   const handleAssign = async () => {
     if (!assigningUserId || !selectedBinId || !selectedTagId) return;
     try {
@@ -164,22 +175,21 @@ const AllUsersPage: React.FC = () => {
       const res = await axios.get<Resident[]>("/api/users/all");
       setUsers(res.data.filter((user) => !user.bin));
 
-      setAssigningUserId(null);
-      setSelectedBinId("");
-      setSelectedTagId("");
-      onOpenChange();
-
-      // ✅ Show success modal
-      openSuccessModal();
+      closeAllModals();
+      setResultSuccess(true);
+      setResultMessage("✅ Bin and tag successfully assigned.");
+      setResultImage("https://via.placeholder.com/300x180.png?text=Assign+Success");
+      setResultOpen(true);
     } catch (err) {
       console.error(err);
-      setValidationSuccess(false);
-      setValidationMessage("❌ Failed to assign bin. Please try again.");
-      openMsgModal();
+      closeAllModals();
+      setResultSuccess(false);
+      setResultMessage("❌ Failed to assign bin. Please try again.");
+      setResultImage("https://via.placeholder.com/300x180.png?text=Assign+Error");
+      setResultOpen(true);
     }
   };
 
-  // Filter bins & tags based on search
   const filteredBins = bins.filter((b) =>
     b.binCode.toLowerCase().includes(binSearch.toLowerCase())
   );
@@ -189,9 +199,12 @@ const AllUsersPage: React.FC = () => {
 
   if (loading)
     return (
-      <div className="flex justify-center mt-20">
-        <Spinner size="lg" label="Loading users..." />
-      </div>
+      <>
+        <Header />
+        <div className="flex justify-center mt-20">
+          <Spinner size="lg" label="Loading users..." />
+        </div>
+      </>
     );
 
   if (error)
@@ -203,14 +216,13 @@ const AllUsersPage: React.FC = () => {
 
       <Card shadow="sm">
         <CardHeader className="flex flex-col items-center text-center">
-          <h2 className="text-2xl font-semibold">Residents Without Bin</h2>
+          <h2 className="text-2xl font-semibold">Smart Bin Assignment</h2>
           <p className="text-default-500 text-sm">
             Validate resident address and zone before assigning bins
           </p>
         </CardHeader>
         <Divider />
         <CardBody>
-          {/* Mock Validation Toggle */}
           <div className="flex justify-end mb-4 items-center gap-2">
             <span className="text-sm text-default-500">
               Force validation fail:
@@ -219,6 +231,7 @@ const AllUsersPage: React.FC = () => {
               isSelected={forceFail}
               onValueChange={setForceFail}
               color="danger"
+              size="sm"
             />
           </div>
 
@@ -227,11 +240,7 @@ const AllUsersPage: React.FC = () => {
               ✅ All residents have been assigned bins.
             </p>
           ) : (
-            <Table
-              aria-label="Residents without bin"
-              className="mt-4"
-              removeWrapper
-            >
+            <Table aria-label="Residents without bin" className="mt-4" removeWrapper>
               <TableHeader>
                 <TableColumn>Username</TableColumn>
                 <TableColumn>Address</TableColumn>
@@ -245,7 +254,6 @@ const AllUsersPage: React.FC = () => {
                 {users.map((user) => {
                   const state = validationStates[user.id] || {
                     validated: false,
-                    validating: false,
                     failed: false,
                   };
                   return (
@@ -259,21 +267,19 @@ const AllUsersPage: React.FC = () => {
                         <Chip
                           color={user.activated ? "success" : "warning"}
                           size="sm"
+                          variant="dot"
                         >
                           {user.activated ? "Active" : "Inactive"}
                         </Chip>
                       </TableCell>
                       <TableCell>
                         {user.activated ? (
-                          <span className="text-default-500 font-medium">
-                            Already assigned
-                          </span>
+                          <span className="text-default-500 font-medium">Assigned</span>
                         ) : !state.validated ? (
                           <Button
                             size="sm"
-                            color="secondary"
+                            color="primary"
                             variant="flat"
-                            isLoading={state.validating}
                             onPress={() => {
                               setAssigningUserId(user.id);
                               handleValidate(user.id);
@@ -288,26 +294,23 @@ const AllUsersPage: React.FC = () => {
                             variant="flat"
                             onPress={() => {
                               setAssigningUserId(user.id);
-                              onOpen();
+                              setAssignOpen(true);
                             }}
                           >
                             Assign Bin
                           </Button>
                         )}
 
-                        {state.failed &&
-                          !state.validating &&
-                          !user.activated && (
-                            <Button
-                              size="sm"
-                              color="danger"
-                              variant="bordered"
-                              className="mt-2"
-                              onPress={() => handleOverride(user.id)}
-                            >
-                              Force Override
-                            </Button>
-                          )}
+                        {state.failed && !user.activated && (
+                          <Button
+                            size="sm"
+                            color="danger"
+                            className="mt-2 ml-2"
+                            onPress={() => handleOverride(user.id)}
+                          >
+                            Override
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   );
@@ -318,9 +321,74 @@ const AllUsersPage: React.FC = () => {
         </CardBody>
       </Card>
 
+      {/* 🌀 Validation Spinner Modal */}
+      <Modal isOpen={validateLoading} onOpenChange={setValidateLoading}>
+        <ModalContent>
+          <ModalHeader className="font-semibold text-primary">
+            Validating Zone...
+          </ModalHeader>
+          <ModalBody className="flex flex-col items-center justify-center space-y-4">
+            <Spinner size="lg" color="primary" />
+            <img
+              src="https://via.placeholder.com/300x180.png?text=Validating"
+              alt="Validating"
+              className="rounded-xl shadow-md"
+            />
+            <p className="text-center text-default-500">
+              Please wait while we check the resident’s zone data.
+            </p>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      {/* 🌀 Override Spinner Modal */}
+      <Modal isOpen={overrideLoading} onOpenChange={setOverrideLoading}>
+        <ModalContent>
+          <ModalHeader className="font-semibold text-warning">
+            Applying Manual Override...
+          </ModalHeader>
+          <ModalBody className="flex flex-col items-center justify-center space-y-4">
+            <Spinner size="lg" color="warning" />
+            <img
+              src="https://via.placeholder.com/300x180.png?text=Overriding"
+              alt="Overriding"
+              className="rounded-xl shadow-md"
+            />
+            <p className="text-center text-default-500">
+              Please wait while manual override is being applied.
+            </p>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      {/* ✅ Result Modal */}
+      <Modal isOpen={resultOpen} onOpenChange={setResultOpen}>
+        <ModalContent>
+          <ModalHeader
+            className={`font-semibold ${
+              resultSuccess ? "text-success" : "text-danger"
+            }`}
+          >
+            {resultSuccess ? "Success" : "Error"}
+          </ModalHeader>
+          <ModalBody className="flex flex-col items-center space-y-4">
+            <img
+              src={resultImage}
+              alt="Result"
+              className="rounded-xl shadow-md"
+            />
+            <p className="text-center">{resultMessage}</p>
+          </ModalBody>
+          <ModalFooter>
+            <Button color="primary" onPress={() => setResultOpen(false)} size="sm">
+              OK
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
       {/* Assign Modal */}
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+      <Modal isOpen={assignOpen} onOpenChange={setAssignOpen}>
         <ModalContent>
           {(onClose) => (
             <>
@@ -328,129 +396,61 @@ const AllUsersPage: React.FC = () => {
                 Assign Bin & Tag
               </ModalHeader>
               <ModalBody className="space-y-6">
-                {/* Bin Search + List */}
-                <div>
-                  <Input
-                    label="Search Bins"
-                    placeholder="Search by type..."
-                    value={binSearch}
-                    onChange={(e) => setBinSearch(e.target.value)}
-                  />
-                  <div className="max-h-40 overflow-y-auto rounded mt-1">
-                    {filteredBins.filter((b) => !b.assignedUser).length ===
-                    0 ? (
-                      <p className="text-center text-sm text-default-500 p-2">
-                        No bins found
-                      </p>
-                    ) : (
-                      filteredBins
-                        .filter((b) => !b.assignedUser) // exclude assigned bins
-                        .map((b) => (
-                          <div
-                            key={b.id}
-                            className={`p-2 cursor-pointer hover:bg-default-100 ${
-                              selectedBinId === b.id
-                                ? "bg-primary-100 font-semibold"
-                                : ""
-                            }`}
-                            onClick={() => setSelectedBinId(b.id)}
-                          >
-                            {b.binCode} - {b.type} - {b.status}
-                          </div>
-                        ))
-                    )}
-                  </div>
+                <Input
+                  label="Search Bins"
+                  variant="bordered"
+                  value={binSearch}
+                  onChange={(e) => setBinSearch(e.target.value)}
+                />
+                <div className="max-h-40 overflow-y-auto">
+                  {filteredBins.map((b) => (
+                    <div
+                      key={b.id}
+                      className={`p-2 cursor-pointer hover:bg-default-100 ${
+                        selectedBinId === b.id ? "bg-primary-100" : ""
+                      }`}
+                      onClick={() => setSelectedBinId(b.id)}
+                    >
+                      {b.binCode} - {b.type}
+                    </div>
+                  ))}
                 </div>
 
-                {/* Tag Search + List */}
-                <div>
-                  <Input
-                    label="Search Tags"
-                    placeholder="Search by tag ID..."
-                    variant="underlined"
-                    color="primary"
-                    className="mb-2"
-                    value={tagSearch}
-                    onChange={(e) => setTagSearch(e.target.value)}
-                  />
-                  <div className="max-h-40 overflow-y-auto  rounded mt-1">
-                    {filteredTags.length === 0 ? (
-                      <p className="text-center text-sm text-default-500 p-2">
-                        No tags found
-                      </p>
-                    ) : (
-                      filteredTags.map((t) => (
-                        <div
-                          key={t.id}
-                          className={`p-2 cursor-pointer hover:bg-default-100 ${
-                            selectedTagId === t.id
-                              ? "bg-primary-100 font-semibold"
-                              : ""
-                          }`}
-                          onClick={() => setSelectedTagId(t.id)}
-                        >
-                          {t.tagId}
-                        </div>
-                      ))
-                    )}
-                  </div>
+                <Input
+                  label="Search Tags"
+                  variant="bordered"
+                  value={tagSearch}
+                  onChange={(e) => setTagSearch(e.target.value)}
+                />
+                <div className="max-h-40 overflow-y-auto">
+                  {filteredTags.map((t) => (
+                    <div
+                      key={t.id}
+                      className={`p-2 cursor-pointer hover:bg-default-100 ${
+                        selectedTagId === t.id ? "bg-primary-100" : ""
+                      }`}
+                      onClick={() => setSelectedTagId(t.id)}
+                    >
+                      {t.tagId}
+                    </div>
+                  ))}
                 </div>
               </ModalBody>
-
               <ModalFooter>
-                <Button variant="light" onPress={onClose}>
+                <Button variant="light" onPress={onClose} color="danger" size="sm">
                   Cancel
                 </Button>
                 <Button
-                  color="success"
+                  color="primary"
                   onPress={handleAssign}
-                  disabled={!selectedBinId || !selectedTagId} // require selection
+                  disabled={!selectedBinId || !selectedTagId}
+                  size="sm"
                 >
-                  Confirm Assign
+                  Confirm
                 </Button>
               </ModalFooter>
             </>
           )}
-        </ModalContent>
-      </Modal>
-
-      {/* Validation Result Modal */}
-      <Modal isOpen={msgOpen} onOpenChange={onMsgModalChange}>
-        <ModalContent>
-          <ModalHeader
-            className={`font-semibold ${
-              validationSuccess ? "text-success" : "text-danger"
-            }`}
-          >
-            {validationSuccess ? "Validation Success" : "Validation Failed"}
-          </ModalHeader>
-          <ModalBody>
-            <p>{validationMessage}</p>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="primary" onPress={onMsgModalChange}>
-              OK
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-
-      {/* ✅ Assign Success Modal */}
-      <Modal isOpen={successOpen} onOpenChange={onSuccessModalChange}>
-        <ModalContent>
-          <ModalHeader className="font-semibold text-success">
-            ✅ Assignment Successful
-          </ModalHeader>
-          <ModalBody>
-            <p>
-              The bin and tag have been successfully assigned to the resident.
-            </p>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="primary" onPress={onSuccessModalChange}>
-              OK
-            </Button>
-          </ModalFooter>
         </ModalContent>
       </Modal>
     </div>
