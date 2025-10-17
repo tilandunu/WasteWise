@@ -62,6 +62,19 @@ const Header: React.FC = () => {
       <NavbarContent justify="end" className="flex items-center gap-4">
         {backendUser ? (
           <>
+            {/* Route Management Button */}
+            <NavbarItem>
+              <Button
+                as={Link}
+                href="/route-management"
+                color="primary"
+                variant="flat"
+                size="sm"
+              >
+                Route Management
+              </Button>
+            </NavbarItem>
+
             {/* User Info */}
             <NavbarItem className="flex flex-col text-right leading-tight">
               <span className="text-sm font-medium">{backendUser.username}</span>
