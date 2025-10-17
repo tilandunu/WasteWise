@@ -1,0 +1,126 @@
+package com.example.foundation.service;
+
+import com.example.foundation.dto.request.ApplyCreditsRequest;
+import com.example.foundation.dto.request.PaymentRequest;
+import com.example.foundation.dto.response.PaymentResponse;
+import com.example.foundation.model.PaymentRecord;
+import com.example.foundation.repository.PaymentRecordRepository;
+import com.example.foundation.repository.UserRepository;
+import com.example.foundation.repository.BillingAccountRepository;
+import com.example.foundation.model.BillingAccount;
+import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.*;
+
+@Service
+public class BillingService {
+
+    // In-memory cache for payment history only (optional)
+    private final Map<String, List<PaymentRecord>> paymentsByUser = new HashMap<>();
+
+    private final UserRepository userRepository;
+    private final PaymentRecordRepository paymentRecordRepository;
+    private final BillingAccountRepository billingAccountRepository;
+
+    public BillingService(UserRepository userRepository,
+                          PaymentRecordRepository paymentRecordRepository,
+                          BillingAccountRepository billingAccountRepository) {
+        this.userRepository = userRepository;
+        this.paymentRecordRepository = paymentRecordRepository;
+        this.billingAccountRepository = billingAccountRepository;
+    }
+
+    // Initialize an account balance for a user if not present
+    private BillingAccount ensureAccount(String userId) {
+        paymentsByUser.putIfAbsent(userId, new ArrayList<>());
+        return billingAccountRepository.findByUserId(userId)
+                .orElseGet(() -> billingAccountRepository.save(new com.example.foundation.model.BillingAccount(userId, 0.0, 0.0)));
+    }
+
+    public synchronized PaymentResponse pay(String userId, PaymentRequest req) {
+    BillingAccount account = ensureAccount(userId);
+
+        if (req.getAmount() <= 0)
+            throw new IllegalArgumentException("Amount must be > 0");
+
+        // Simulate network/gateway: 90% success, 8% declined, 2% timeout -> pending
+        double rnd = Math.random();
+        PaymentRecord.Status status;
+        String txId = UUID.randomUUID().toString();
+        String method = req.getMethod() == null ? "UNKNOWN" : req.getMethod().toUpperCase();
+
+        if (rnd < 0.90) {
+            status = PaymentRecord.Status.SUCCESS;
+            // apply amount to balance (reduce)
+            double remaining = account.getBalance() - req.getAmount();
+            account.setBalance(remaining);
+            billingAccountRepository.save(account);
+        } else if (rnd < 0.98) {
+            status = PaymentRecord.Status.FAILED;
+        } else {
+            status = PaymentRecord.Status.PENDING;
+        }
+
+    PaymentRecord record = new PaymentRecord(txId, userId, req.getAmount(), method, status, Instant.now(), req.getDetails());
+    // persist to Mongo
+    paymentRecordRepository.save(record);
+    // update optional cache
+    paymentsByUser.get(userId).add(record);
+
+    double remaining = account.getBalance();
+
+    return new PaymentResponse(txId, status.name(), remaining);
+    }
+
+    public synchronized PaymentResponse applyCredits(String userId, ApplyCreditsRequest req) {
+        BillingAccount account = ensureAccount(userId);
+
+        double available = account.getCredits();
+        double toApply = Math.min(available, req.getCreditsToApply());
+        if (toApply <= 0)
+            throw new IllegalArgumentException("No credits available to apply");
+
+        account.setCredits(available - toApply);
+        account.setBalance(account.getBalance() - toApply);
+        billingAccountRepository.save(account);
+
+        String txId = "CREDIT-" + UUID.randomUUID();
+        PaymentRecord record = new PaymentRecord(txId, userId, toApply, "CREDIT", PaymentRecord.Status.SUCCESS, Instant.now(), "Applied recycling credits");
+        paymentRecordRepository.save(record);
+        paymentsByUser.get(userId).add(record);
+
+        return new PaymentResponse(txId, "SUCCESS", account.getBalance());
+    }
+
+    // Helpers for tests / UI
+    public double getBalance(String userId) {
+        BillingAccount account = ensureAccount(userId);
+        return account.getBalance();
+    }
+
+    public double getCredits(String userId) {
+        BillingAccount account = ensureAccount(userId);
+        return account.getCredits();
+    }
+
+    public List<PaymentRecord> getPayments(String userId) {
+        ensureAccount(userId);
+        // return persisted payments (keeps in sync across instances)
+        return paymentRecordRepository.findByUserId(userId);
+    }
+
+    // Admin/test helper to set balances/credits quickly (not exposed via controller)
+    public void setBalance(String userId, double amount) {
+        BillingAccount account = ensureAccount(userId);
+        account.setBalance(amount);
+        billingAccountRepository.save(account);
+    }
+
+    public void addCredits(String userId, double amount) {
+        BillingAccount account = ensureAccount(userId);
+        account.setCredits(account.getCredits() + amount);
+        billingAccountRepository.save(account);
+    }
+
+}
