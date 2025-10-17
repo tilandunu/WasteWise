@@ -31,7 +31,7 @@ const CrewSignInPage: React.FC = () => {
       if (user.assignedTruck != null) {
         navigate("/crew-portal");
       } else {
-        navigate("/");
+        navigate("/crew-portal");
       }
     } catch (err: any) {
       console.error("Login error:", err);
