@@ -32,15 +32,6 @@ const Home: React.FC = () => {
             </Button>
             <Button
               as={Link}
-              href="/route-management"
-              color="success"
-              variant="solid"
-              size="md"
-            >
-              Route Management
-            </Button>
-            <Button
-              as={Link}
               href="/assign-bin"
               color="secondary"
               variant="flat"
