@@ -119,13 +119,4 @@ public class UserController {
         return ResponseEntity.ok(residents);
     }
 
-    //get all crew members
-    @GetMapping("/crew-members")
-    public ResponseEntity<List<CrewMember>> getAllCrewMembers() {
-        List<CrewMember> crewMembers = userRepository.findAll().stream()
-                .filter(user -> user instanceof CrewMember)
-                .map(user -> (CrewMember) user)
-                .toList(); // Java 16+; use Collectors.toList() if older
-        return ResponseEntity.ok(crewMembers);
-    }
 }
