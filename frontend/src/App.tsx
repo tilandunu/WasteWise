@@ -8,6 +8,7 @@ import RegisterBin from "./pages/RegisterBin";
 // import AddTag from "./pages/AddTag";
 import AssignTruckToCrew from "./pages/assignTruckToCrew.tsx";
 import AssignRoute from "./pages/assignRoute.tsx";
+import CrewPortal from "./pages/CrewPortal.tsx";
 
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
       <Route path="/add-tag" element={<AddTag />} /> */}
       <Route path="/assign-truck" element={<AssignTruckToCrew />} />
       <Route path="/assign-route" element={<AssignRoute />} />
+      <Route path="/crew-portal" element={<CrewPortal />} />
     </Routes>
   );
 }
