@@ -6,7 +6,6 @@ import com.example.foundation.model.CrewMember;
 import com.example.foundation.model.Zone;
 import com.example.foundation.repository.UserRepository;
 import com.example.foundation.repository.ZoneRepository;
-import com.example.foundation.repository.CrewMemberRepository;
 
 import java.util.List;
 
@@ -19,12 +18,10 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final ZoneRepository zoneRepository;
-    private final CrewMemberRepository crewRepository;
 
-    public UserController(UserRepository userRepository, ZoneRepository zoneRepository, CrewMemberRepository crewRepository) {
+    public UserController(UserRepository userRepository, ZoneRepository zoneRepository) {
         this.userRepository = userRepository;
         this.zoneRepository = zoneRepository;
-        this.crewRepository = crewRepository;
     }
 
     @PostMapping("/register")
@@ -65,6 +62,7 @@ public class UserController {
     // --- Crew Member Registration ---
     @PostMapping("/register-crew")
     public ResponseEntity<?> registerCrewMember(@RequestBody RegisterUserRequest request) {
+        
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             return ResponseEntity.badRequest().body("Username already exists");
         }
@@ -84,9 +82,14 @@ public class UserController {
         newCrew.setZone(zone);
         newCrew.setAvailable(true);
         newCrew.setActivated(false);
+        
+        // Explicitly set assignedTruck to null (new crew members start unassigned)
+        newCrew.setAssignedTruck(null);
 
-        crewRepository.save(newCrew);
-        return ResponseEntity.ok("Crew member registered successfully. Await activation.");
+        // Save using userRepository instead of crewRepository
+        CrewMember savedCrew = userRepository.save(newCrew);
+        
+        return ResponseEntity.ok(savedCrew );
     }
 
     // --- Login ---
@@ -114,5 +117,15 @@ public class UserController {
                 .map(user -> (Resident) user)
                 .toList(); // Java 16+; use Collectors.toList() if older
         return ResponseEntity.ok(residents);
+    }
+
+    //get all crew members
+    @GetMapping("/crew-members")
+    public ResponseEntity<List<CrewMember>> getAllCrewMembers() {
+        List<CrewMember> crewMembers = userRepository.findAll().stream()
+                .filter(user -> user instanceof CrewMember)
+                .map(user -> (CrewMember) user)
+                .toList(); // Java 16+; use Collectors.toList() if older
+        return ResponseEntity.ok(crewMembers);
     }
 }

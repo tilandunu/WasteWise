@@ -11,25 +11,7 @@ import java.util.List;
 @RequestMapping("/api/crew")
 public class CrewMemberController {
 
-    @Autowired
-    private CrewMemberService crewService;
 
 
-    // --- Assign truck to crew ---
-    @PostMapping("/{crewId}/assign-truck/{truckId}")
-    public CrewMember assignTruck(@PathVariable String crewId, @PathVariable String truckId) {
-        return crewService.assignTruck(crewId, truckId);
-    }
 
-    // --- Unassign truck from crew ---
-    @PostMapping("/{crewId}/unassign-truck")
-    public CrewMember unassignTruck(@PathVariable String crewId) {
-        return crewService.unassignTruck(crewId);
-    }
-
-    // --- Get available crew members ---
-    @GetMapping("/available")
-    public List<CrewMember> getAvailableCrew() {
-        return crewService.getAvailableCrew();
-    }
 }

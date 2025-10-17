@@ -39,16 +39,6 @@ public class TruckController {
         truckService.deleteTruck(id);
     }
 
-    // Assign crew to truck
-    @PostMapping("/{truckId}/assign-crew/{crewId}")
-    public Truck assignCrewToTruck(@PathVariable String truckId, @PathVariable String crewId) {
-        return truckService.assignCrewToTruck(truckId, crewId);
-    }
-
-    @PostMapping("/{truckId}/remove-crew/{crewId}")
-    public Truck removeCrewFromTruck(@PathVariable String truckId, @PathVariable String crewId) {
-        return truckService.removeCrewFromTruck(truckId, crewId);
-    }
 
     // Assign route to truck
     @PostMapping("/{truckId}/assign-route/{routeId}")

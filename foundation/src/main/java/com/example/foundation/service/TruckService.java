@@ -1,9 +1,8 @@
 package com.example.foundation.service;
 
-import com.example.foundation.model.CrewMember;
+
 import com.example.foundation.model.Route;
 import com.example.foundation.model.Truck;
-import com.example.foundation.repository.CrewMemberRepository;
 import com.example.foundation.repository.RouteRepository;
 import com.example.foundation.repository.TruckRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +17,7 @@ public class TruckService {
     @Autowired
     private TruckRepository truckRepository;
 
-    @Autowired
-    private CrewMemberRepository crewRepository;
+ 
 
     @Autowired
     private RouteRepository routeRepository;
@@ -52,36 +50,8 @@ public class TruckService {
         truckRepository.deleteById(id);
     }
 
-    // --- Assign Crew to Truck ---
-    public Truck assignCrewToTruck(String truckId, String crewId) {
-        Truck truck = truckRepository.findById(truckId)
-                .orElseThrow(() -> new RuntimeException("Truck not found"));
 
-        CrewMember crew = crewRepository.findById(crewId)
-                .orElseThrow(() -> new RuntimeException("Crew member not found"));
 
-        if (!truck.getAssignedCrew().contains(crew)) {
-            truck.getAssignedCrew().add(crew);
-            crew.setAssignedTruck(truck);
-            crewRepository.save(crew);
-        }
-
-        return truckRepository.save(truck);
-    }
-
-    public Truck removeCrewFromTruck(String truckId, String crewId) {
-        Truck truck = truckRepository.findById(truckId)
-                .orElseThrow(() -> new RuntimeException("Truck not found"));
-
-        truck.getAssignedCrew().removeIf(c -> c.getId().equals(crewId));
-
-        crewRepository.findById(crewId).ifPresent(crew -> {
-            crew.setAssignedTruck(null);
-            crewRepository.save(crew);
-        });
-
-        return truckRepository.save(truck);
-    }
 
     // --- Assign Route to Truck ---
     public Truck assignRouteToTruck(String truckId, String routeId) {
