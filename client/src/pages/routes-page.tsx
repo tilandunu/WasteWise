@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
 import { Input } from "@heroui/input";
@@ -14,17 +14,13 @@ import backend_Path from "../config/axiosInstance";
 interface Route {
   id: string;
   routeName: string;
-  description?: string;
-  startLocation: string;
-  endLocation: string;
-  distance?: number;
-  estimatedDuration?: number;
   active: boolean;
+  zone?: Zone;
 }
 
 interface Zone {
   id: string;
-  zoneName: string;
+  name: string;
   description?: string;
 }
 
@@ -33,17 +29,14 @@ const Routes: React.FC = () => {
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingRoute, setEditingRoute] = useState<Route | null>(null);
+  const [selectedZoneId, setSelectedZoneId] = useState<string>("");
   
   const { isOpen: isAddOpen, onOpen: onAddOpen, onClose: onAddClose } = useDisclosure();
   const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
   
   const [formData, setFormData] = useState({
     routeName: "",
-    description: "",
-    startLocation: "",
-    endLocation: "",
-    distance: "",
-    estimatedDuration: "",
+    zoneId: "",
     active: true
   });
 
@@ -77,12 +70,8 @@ const Routes: React.FC = () => {
     try {
       const routeData = {
         routeName: formData.routeName,
-        description: formData.description,
-        startLocation: formData.startLocation,
-        endLocation: formData.endLocation,
-        distance: formData.distance ? parseFloat(formData.distance) : null,
-        estimatedDuration: formData.estimatedDuration ? parseInt(formData.estimatedDuration) : null,
         active: formData.active,
+        zone: formData.zoneId ? { id: formData.zoneId } : null
       };
       
       await backend_Path.post("/api/routes/create", routeData);
@@ -100,12 +89,8 @@ const Routes: React.FC = () => {
     try {
       const routeData = {
         routeName: formData.routeName,
-        description: formData.description,
-        startLocation: formData.startLocation,
-        endLocation: formData.endLocation,
-        distance: formData.distance ? parseFloat(formData.distance) : null,
-        estimatedDuration: formData.estimatedDuration ? parseInt(formData.estimatedDuration) : null,
         active: formData.active,
+        zone: formData.zoneId ? { id: formData.zoneId } : null
       };
       
       await backend_Path.put(`/api/routes/${editingRoute.id}`, routeData);
@@ -129,28 +114,27 @@ const Routes: React.FC = () => {
     }
   };
 
-  const openEditModal = (route: Route) => {
+  const openEditModal = async (route: Route) => {
+    // ensure zones are loaded so the Select has options
+    if (zones.length === 0) await fetchZones();
     setEditingRoute(route);
     setFormData({
       routeName: route.routeName,
-      description: route.description || "",
-      startLocation: route.startLocation,
-      endLocation: route.endLocation,
-      distance: route.distance?.toString() || "",
-      estimatedDuration: route.estimatedDuration?.toString() || "",
+      zoneId: route.zone?.id || "",
       active: route.active
     });
     onEditOpen();
   };
 
+  const openAddModal = async () => {
+    if (zones.length === 0) await fetchZones();
+    onAddOpen();
+  };
+
   const resetForm = () => {
     setFormData({
       routeName: "",
-      description: "",
-      startLocation: "",
-      endLocation: "",
-      distance: "",
-      estimatedDuration: "",
+      zoneId: "",
       active: true
     });
   };
@@ -158,6 +142,11 @@ const Routes: React.FC = () => {
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
+
+  const displayedRoutes = useMemo(() => {
+    if (!selectedZoneId) return routes;
+    return routes.filter((r) => r.zone?.id === selectedZoneId);
+  }, [routes, selectedZoneId]);
 
   return (
     <>
@@ -169,9 +158,31 @@ const Routes: React.FC = () => {
             <h1 className="text-3xl font-bold">Routes Management</h1>
             <p className="text-default-500 mt-1">Manage all your delivery routes</p>
           </div>
-          <Button color="primary" onPress={onAddOpen}>
-            Add New Route
-          </Button>
+          <div className="flex items-center gap-3">
+            <div>
+              <label
+                htmlFor="zone-filter"
+                className="block text-sm text-default-500 mb-1"
+              >
+                Filter Zone
+              </label>
+              <select
+                id="zone-filter"
+                className="rounded border px-2 py-1"
+                value={selectedZoneId || "__all"}
+                onChange={(e) => setSelectedZoneId(e.target.value === "__all" ? "" : e.target.value)}
+              >
+                <option value="__all">All Zones</option>
+                {zones.map((zone) => (
+                  <option key={zone.id} value={zone.id}>{zone.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <Button color="primary" onPress={openAddModal}>
+              Add New Route
+            </Button>
+          </div>
         </div>
 
         <Divider className="mb-6" />
@@ -179,31 +190,25 @@ const Routes: React.FC = () => {
         {/* Routes Table */}
         <Card>
           <CardBody>
-            <Table aria-label="Routes table">
-              <TableHeader>
-                <TableColumn>ROUTE NAME</TableColumn>
-                <TableColumn>START LOCATION</TableColumn>
-                <TableColumn>END LOCATION</TableColumn>
-                <TableColumn>DISTANCE</TableColumn>
-                <TableColumn>DURATION</TableColumn>
-                <TableColumn>STATUS</TableColumn>
-                <TableColumn>ACTIONS</TableColumn>
-              </TableHeader>
-              <TableBody>
-                {routes.map((route) => (
+            {loading ? (
+              <div className="flex justify-center items-center py-8">
+                <p>Loading routes...</p>
+              </div>
+            ) : (
+              <Table aria-label="Routes table">
+                <TableHeader>
+                  <TableColumn>ROUTE NAME</TableColumn>
+                  <TableColumn>ZONE</TableColumn>
+                  <TableColumn>STATUS</TableColumn>
+                  <TableColumn>ACTIONS</TableColumn>
+                </TableHeader>
+                <TableBody>
+                  {displayedRoutes.map((route) => (
                   <TableRow key={route.id}>
                     <TableCell>
-                      <div>
-                        <p className="font-medium">{route.routeName}</p>
-                        {route.description && (
-                          <p className="text-sm text-default-500">{route.description}</p>
-                        )}
-                      </div>
+                      <p className="font-medium">{route.routeName}</p>
                     </TableCell>
-                    <TableCell>{route.startLocation}</TableCell>
-                    <TableCell>{route.endLocation}</TableCell>
-                    <TableCell>{route.distance ? `${route.distance} km` : "N/A"}</TableCell>
-                    <TableCell>{route.estimatedDuration ? `${route.estimatedDuration} min` : "N/A"}</TableCell>
+                    <TableCell>{route.zone?.name || "No Zone"}</TableCell>
                     <TableCell>
                       <Chip
                         color={route.active ? "success" : "danger"}
@@ -235,57 +240,43 @@ const Routes: React.FC = () => {
                     </TableCell>
                   </TableRow>
                 ))}
-              </TableBody>
-            </Table>
+                  </TableBody>
+                </Table>
+              )}
           </CardBody>
         </Card>
 
         {/* Add Route Modal */}
-        <Modal isOpen={isAddOpen} onClose={onAddClose} size="2xl">
+        <Modal isOpen={isAddOpen} onClose={onAddClose} size="lg">
           <ModalContent>
             <ModalHeader>Add New Route</ModalHeader>
             <ModalBody>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <Input
                   label="Route Name"
                   placeholder="Enter route name"
                   value={formData.routeName}
                   onChange={(e) => handleInputChange("routeName", e.target.value)}
                 />
-                <div className="md:col-span-2">
-                  <Input
-                    label="Description"
-                    placeholder="Enter route description (optional)"
-                    value={formData.description}
-                    onChange={(e) => handleInputChange("description", e.target.value)}
-                  />
-                </div>
-                <Input
-                  label="Start Location"
-                  placeholder="Enter start location"
-                  value={formData.startLocation}
-                  onChange={(e) => handleInputChange("startLocation", e.target.value)}
-                />
-                <Input
-                  label="End Location"
-                  placeholder="Enter end location"
-                  value={formData.endLocation}
-                  onChange={(e) => handleInputChange("endLocation", e.target.value)}
-                />
-                <Input
-                  label="Distance (km)"
-                  placeholder="Enter distance in km"
-                  type="number"
-                  value={formData.distance}
-                  onChange={(e) => handleInputChange("distance", e.target.value)}
-                />
-                <Input
-                  label="Estimated Duration (minutes)"
-                  placeholder="Enter duration in minutes"
-                  type="number"
-                  value={formData.estimatedDuration}
-                  onChange={(e) => handleInputChange("estimatedDuration", e.target.value)}
-                />
+                {zones.length === 0 ? (
+                  <p className="text-default-500">No zones available. Please create zones first.</p>
+                ) : (
+                  <Select
+                    label="Zone"
+                    placeholder="Select a zone (optional)"
+                    selectedKeys={formData.zoneId ? [formData.zoneId] : []}
+                    onSelectionChange={(keys) => {
+                      const selectedKey = Array.from(keys)[0] as string;
+                      handleInputChange("zoneId", selectedKey || "");
+                    }}
+                  >
+                    {zones.map((zone) => (
+                      <SelectItem key={zone.id}>
+                        {zone.name}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                )}
               </div>
             </ModalBody>
             <ModalFooter>
@@ -300,57 +291,42 @@ const Routes: React.FC = () => {
         </Modal>
 
         {/* Edit Route Modal */}
-        <Modal isOpen={isEditOpen} onClose={onEditClose} size="2xl">
+        <Modal isOpen={isEditOpen} onClose={onEditClose} size="lg">
           <ModalContent>
             <ModalHeader>Edit Route</ModalHeader>
             <ModalBody>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <Input
                   label="Route Name"
                   placeholder="Enter route name"
                   value={formData.routeName}
                   onChange={(e) => handleInputChange("routeName", e.target.value)}
                 />
-                <div className="md:col-span-2">
-                  <Input
-                    label="Description"
-                    placeholder="Enter route description (optional)"
-                    value={formData.description}
-                    onChange={(e) => handleInputChange("description", e.target.value)}
-                  />
-                </div>
-                <Input
-                  label="Start Location"
-                  placeholder="Enter start location"
-                  value={formData.startLocation}
-                  onChange={(e) => handleInputChange("startLocation", e.target.value)}
-                />
-                <Input
-                  label="End Location"
-                  placeholder="Enter end location"
-                  value={formData.endLocation}
-                  onChange={(e) => handleInputChange("endLocation", e.target.value)}
-                />
-                <Input
-                  label="Distance (km)"
-                  placeholder="Enter distance in km"
-                  type="number"
-                  value={formData.distance}
-                  onChange={(e) => handleInputChange("distance", e.target.value)}
-                />
-                <Input
-                  label="Estimated Duration (minutes)"
-                  placeholder="Enter duration in minutes"
-                  type="number"
-                  value={formData.estimatedDuration}
-                  onChange={(e) => handleInputChange("estimatedDuration", e.target.value)}
-                />
+                {zones.length === 0 ? (
+                  <p className="text-default-500">No zones available. Please create zones first.</p>
+                ) : (
+                  <Select
+                    label="Zone"
+                    placeholder="Select a zone (optional)"
+                    selectedKeys={formData.zoneId ? [formData.zoneId] : []}
+                    onSelectionChange={(keys) => {
+                      const selectedKey = Array.from(keys)[0] as string;
+                      
+                      handleInputChange("zoneId", selectedKey || "");
+                    }}
+                  >
+                    {zones.map((zone) => (
+                      <SelectItem key={zone.id}>{zone.name}</SelectItem>
+                    ))}
+                  </Select>
+                )}
                 <Select
                   label="Status"
                   placeholder="Select status"
                   selectedKeys={[formData.active.toString()]}
                   onSelectionChange={(keys) => {
                     const value = Array.from(keys)[0] as string;
+                    
                     handleInputChange("active", value === "true");
                   }}
                 >
