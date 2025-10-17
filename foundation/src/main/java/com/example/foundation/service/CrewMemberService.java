@@ -1,7 +1,6 @@
 package com.example.foundation.service;
 
 import com.example.foundation.model.CrewMember;
-import com.example.foundation.model.Truck;
 import com.example.foundation.repository.UserRepository;
 import com.example.foundation.repository.TruckRepository;
 import org.springframework.stereotype.Service;

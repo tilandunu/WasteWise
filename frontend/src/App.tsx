@@ -6,6 +6,9 @@ import RegisterBin from "./pages/RegisterBin";
 // import AddZonePage from "./pages/AddZone";
 // import AddBinPage from "./pages/AddBin";
 // import AddTag from "./pages/AddTag";
+import AssignTruckToCrew from "./pages/assignTruckToCrew.tsx";
+import AssignRoute from "./pages/assignRoute.tsx";
+
 
 export default function App() {
   return (
@@ -17,6 +20,8 @@ export default function App() {
       {/* <Route path="/add-zone" element={<AddZonePage />} />
       <Route path="/add-bin" element={<AddBinPage />} />
       <Route path="/add-tag" element={<AddTag />} /> */}
+      <Route path="/assign-truck" element={<AssignTruckToCrew />} />
+      <Route path="/assign-route" element={<AssignRoute />} />
     </Routes>
   );
 }

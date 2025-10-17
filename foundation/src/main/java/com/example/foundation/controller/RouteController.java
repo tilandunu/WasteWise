@@ -33,7 +33,7 @@ public class RouteController {
     }
 
     // --- Create route ---
-    @PostMapping
+    @PostMapping("create")
     public ResponseEntity<Route> createRoute(@RequestBody Route route) {
         Route createdRoute = routeService.createRoute(route);
         return ResponseEntity.ok(createdRoute);
