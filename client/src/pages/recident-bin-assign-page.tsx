@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import axios from "../config/axiosInstance";
 import { Card, CardHeader, CardBody } from "@heroui/card";
 import {
@@ -14,16 +14,11 @@ import { Spinner } from "@heroui/spinner";
 import { Divider } from "@heroui/divider";
 import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@heroui/modal";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/modal";
 import { Switch } from "@heroui/switch";
 import Header from "../components/header";
 import { Image } from "@heroui/react";
+
 interface Zone {
   id: string;
   name: string;
@@ -61,10 +56,7 @@ const AllUsersPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [validationStates, setValidationStates] = useState<
-    Record<string, { validated: boolean; failed: boolean }>
-  >({});
-
+  const [validationStates, setValidationStates] = useState<Record<string, { validated: boolean; failed: boolean }>>({});
   const [assigningUserId, setAssigningUserId] = useState<string | null>(null);
   const [selectedBinId, setSelectedBinId] = useState("");
   const [selectedTagId, setSelectedTagId] = useState("");
@@ -73,7 +65,6 @@ const AllUsersPage: React.FC = () => {
   const [binSearch, setBinSearch] = useState("");
   const [tagSearch, setTagSearch] = useState("");
 
-  // 🧩 Explicit modal states (reliable)
   const [validateLoading, setValidateLoading] = useState(false);
   const [overrideLoading, setOverrideLoading] = useState(false);
   const [resultOpen, setResultOpen] = useState(false);
@@ -82,6 +73,12 @@ const AllUsersPage: React.FC = () => {
   const [resultMessage, setResultMessage] = useState("");
   const [resultSuccess, setResultSuccess] = useState(false);
   const [resultImage, setResultImage] = useState("");
+
+  // Pagination and search/filter state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showInactive, setShowInactive] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -104,7 +101,6 @@ const AllUsersPage: React.FC = () => {
     fetchData();
   }, []);
 
-  // ✅ Always close all modals before opening a new one
   const closeAllModals = () => {
     setValidateLoading(false);
     setOverrideLoading(false);
@@ -112,75 +108,46 @@ const AllUsersPage: React.FC = () => {
     setAssignOpen(false);
   };
 
-  // ✅ Validation flow
   const handleValidate = (userId: string) => {
     closeAllModals();
-    setValidateLoading(true); // show spinner
+    setValidateLoading(true);
 
     setTimeout(() => {
-      setValidateLoading(false); // stop spinner first
-
+      setValidateLoading(false);
       if (forceFail) {
-        setValidationStates((prev) => ({
-          ...prev,
-          [userId]: { validated: false, failed: true },
-        }));
+        setValidationStates((prev) => ({ ...prev, [userId]: { validated: false, failed: true } }));
         setResultSuccess(false);
-        setResultMessage(
-          "❌ Zone validation failed. Try again or override manually."
-        );
-        setResultImage(
-          "https://via.placeholder.com/300x180.png?text=Validation+Failed"
-        );
+        setResultMessage("❌ Zone validation failed. Try again or override manually.");
+        setResultImage("https://via.placeholder.com/300x180.png?text=Validation+Failed");
       } else {
-        setValidationStates((prev) => ({
-          ...prev,
-          [userId]: { validated: true, failed: false },
-        }));
+        setValidationStates((prev) => ({ ...prev, [userId]: { validated: true, failed: false } }));
         setResultSuccess(true);
         setResultMessage("✅ Zone validated successfully!");
-        setResultImage(
-          "https://via.placeholder.com/300x180.png?text=Validation+Success"
-        );
+        setResultImage("https://via.placeholder.com/300x180.png?text=Validation+Success");
       }
-
       setTimeout(() => setResultOpen(true), 200);
     }, 3000);
   };
 
-  // ✅ Override flow
   const handleOverride = (userId: string) => {
     closeAllModals();
     setOverrideLoading(true);
 
     setTimeout(() => {
-      setOverrideLoading(false); // stop spinner
-      setValidationStates((prev) => ({
-        ...prev,
-        [userId]: { validated: true, failed: false },
-      }));
+      setOverrideLoading(false);
+      setValidationStates((prev) => ({ ...prev, [userId]: { validated: true, failed: false } }));
       setResultSuccess(true);
-      setResultMessage(
-        "⚠️ Validation manually overridden. Proceed with caution."
-      );
-      setResultImage(
-        "https://via.placeholder.com/300x180.png?text=Manual+Override"
-      );
-
+      setResultMessage("⚠️ Validation manually overridden. Proceed with caution.");
+      setResultImage("https://via.placeholder.com/300x180.png?text=Manual+Override");
       setTimeout(() => setResultOpen(true), 200);
     }, 3000);
   };
 
-  // ✅ Assign logic unchanged
   const handleAssign = async () => {
     if (!assigningUserId || !selectedBinId || !selectedTagId) return;
     try {
-      await axios.post("/api/officer/assign-tag", null, {
-        params: { binId: selectedBinId, tagId: selectedTagId },
-      });
-      await axios.post("/api/officer/assign-bin", null, {
-        params: { binId: selectedBinId, residentId: assigningUserId },
-      });
+      await axios.post("/api/officer/assign-tag", null, { params: { binId: selectedBinId, tagId: selectedTagId } });
+      await axios.post("/api/officer/assign-bin", null, { params: { binId: selectedBinId, residentId: assigningUserId } });
 
       const res = await axios.get<Resident[]>("/api/users/all");
       setUsers(res.data.filter((user) => !user.bin));
@@ -188,28 +155,40 @@ const AllUsersPage: React.FC = () => {
       closeAllModals();
       setResultSuccess(true);
       setResultMessage("✅ Bin and tag successfully assigned.");
-      setResultImage(
-        "https://via.placeholder.com/300x180.png?text=Assign+Success"
-      );
+      setResultImage("https://via.placeholder.com/300x180.png?text=Assign+Success");
       setResultOpen(true);
     } catch (err) {
       console.error(err);
       closeAllModals();
       setResultSuccess(false);
       setResultMessage("❌ Failed to assign bin. Please try again.");
-      setResultImage(
-        "https://via.placeholder.com/300x180.png?text=Assign+Error"
-      );
+      setResultImage("https://via.placeholder.com/300x180.png?text=Assign+Error");
       setResultOpen(true);
     }
   };
 
-  const filteredBins = bins.filter((b) =>
-    b.binCode.toLowerCase().includes(binSearch.toLowerCase())
-  );
-  const filteredTags = tags.filter((t) =>
-    t.tagId.toLowerCase().includes(tagSearch.toLowerCase())
-  );
+  const filteredBins = bins.filter((b) => b.binCode.toLowerCase().includes(binSearch.toLowerCase()));
+  const filteredTags = tags.filter((t) => t.tagId.toLowerCase().includes(tagSearch.toLowerCase()));
+
+  // --- Filtering users based on search & inactive filter ---
+  const filteredUsers = useMemo(() => {
+    return users.filter((user) => {
+      const matchesSearch =
+        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.contactNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.zone?.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = showInactive ? !user.activated : true;
+      return matchesSearch && matchesStatus;
+    });
+  }, [users, searchTerm, showInactive]);
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const displayedUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  };
 
   if (loading)
     return (
@@ -237,28 +216,29 @@ const AllUsersPage: React.FC = () => {
         </CardHeader>
         <Divider />
         <CardBody>
-          <div className="flex justify-end mb-4 items-center gap-2">
-            <span className="text-sm text-default-500">
-              Force validation fail:
-            </span>
-            <Switch
-              isSelected={forceFail}
-              onValueChange={setForceFail}
-              color="danger"
-              size="sm"
+          <div className="flex flex-col md:flex-row justify-between mb-4 gap-2 items-center">
+            <Input
+              placeholder="Search residents..."
+              value={searchTerm}
+              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
             />
+            <Button
+              color={showInactive ? "danger" : "primary"}
+              onPress={() => { setShowInactive((prev) => !prev); setCurrentPage(1); }}
+            >
+              {showInactive ? "Show Active Only" : "Show Inactive"}
+            </Button>
           </div>
 
-          {users.length === 0 ? (
-            <p className="text-center text-default-600">
-              ✅ All residents have been assigned bins.
-            </p>
+          <div className="flex justify-end mb-4 items-center gap-2">
+            <span className="text-sm text-default-500">Force validation fail:</span>
+            <Switch isSelected={forceFail} onValueChange={setForceFail} color="danger" size="sm" />
+          </div>
+
+          {displayedUsers.length === 0 ? (
+            <p className="text-center text-default-600">✅ No residents found.</p>
           ) : (
-            <Table
-              aria-label="Residents without bin"
-              className="mt-4"
-              removeWrapper
-            >
+            <Table aria-label="Residents without bin" className="mt-4" removeWrapper>
               <TableHeader>
                 <TableColumn>Username</TableColumn>
                 <TableColumn>Address</TableColumn>
@@ -269,11 +249,8 @@ const AllUsersPage: React.FC = () => {
                 <TableColumn>Actions</TableColumn>
               </TableHeader>
               <TableBody>
-                {users.map((user) => {
-                  const state = validationStates[user.id] || {
-                    validated: false,
-                    failed: false,
-                  };
+                {displayedUsers.map((user) => {
+                  const state = validationStates[user.id] || { validated: false, failed: false };
                   return (
                     <TableRow key={user.id}>
                       <TableCell>{user.username}</TableCell>
@@ -282,52 +259,25 @@ const AllUsersPage: React.FC = () => {
                       <TableCell>{user.zone?.name || "N/A"}</TableCell>
                       <TableCell>{user.premisesType}</TableCell>
                       <TableCell>
-                        <Chip
-                          color={user.activated ? "success" : "warning"}
-                          size="sm"
-                          variant="dot"
-                        >
+                        <Chip color={user.activated ? "success" : "warning"} size="sm" variant="dot">
                           {user.activated ? "Active" : "Inactive"}
                         </Chip>
                       </TableCell>
                       <TableCell>
                         {user.activated ? (
-                          <span className="text-default-500 font-medium">
-                            Assigned
-                          </span>
+                          <span className="text-default-500 font-medium">Assigned</span>
                         ) : !state.validated ? (
-                          <Button
-                            size="sm"
-                            color="primary"
-                            variant="flat"
-                            onPress={() => {
-                              setAssigningUserId(user.id);
-                              handleValidate(user.id);
-                            }}
-                          >
+                          <Button size="sm" color="primary" variant="flat" onPress={() => { setAssigningUserId(user.id); handleValidate(user.id); }}>
                             Validate
                           </Button>
                         ) : (
-                          <Button
-                            size="sm"
-                            color="primary"
-                            variant="flat"
-                            onPress={() => {
-                              setAssigningUserId(user.id);
-                              setAssignOpen(true);
-                            }}
-                          >
+                          <Button size="sm" color="primary" variant="flat" onPress={() => { setAssigningUserId(user.id); setAssignOpen(true); }}>
                             Assign Bin
                           </Button>
                         )}
 
                         {state.failed && !user.activated && (
-                          <Button
-                            size="sm"
-                            color="danger"
-                            className="mt-2 ml-2"
-                            onPress={() => handleOverride(user.id)}
-                          >
+                          <Button size="sm" color="danger" className="mt-2 ml-2" onPress={() => handleOverride(user.id)}>
                             Override
                           </Button>
                         )}
@@ -337,6 +287,19 @@ const AllUsersPage: React.FC = () => {
                 })}
               </TableBody>
             </Table>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-4">
+              <Button disabled={currentPage === 1} onPress={() => handlePageChange(currentPage - 1)} size="sm">Prev</Button>
+              {Array.from({ length: Math.min(totalPages, 3) }, (_, i) => (
+                <Button key={i} color={currentPage === i + 1 ? "primary" : "default"} onPress={() => handlePageChange(i + 1)} size="sm">
+                  {i + 1}
+                </Button>
+              ))}
+              <Button disabled={currentPage === totalPages} onPress={() => handlePageChange(currentPage + 1)} size="sm">Next</Button>
+            </div>
           )}
         </CardBody>
       </Card>
