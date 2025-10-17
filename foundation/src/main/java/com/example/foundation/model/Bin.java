@@ -4,23 +4,42 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.UUID;
+
 @Document(collection = "bins")
 public class Bin {
 
     @Id
     private String id;
-    private String type;      // e.g., General, Recyclable
-    private String status;    // e.g., IN_STOCK, ASSIGNED
+    private String binCode;
+    private String type;
+    private String status;
 
     @DBRef
-    private User assignedUser; // optional
+    private User assignedUser; 
 
     @DBRef
-    private Tag tag; // optional
+    private Tag tag; 
+
+    // --- Auto-generate unique BinCode before saving ---
+    @jakarta.persistence.PrePersist
+    public void prePersist() {
+        if (this.binCode == null || this.binCode.isEmpty()) {
+            // Generate a short random unique code (BIN-xxxx)
+            this.binCode = "BIN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        }
+
+        if (this.status == null || this.status.isEmpty()) {
+            this.status = "IN_STOCK"; // default status
+        }
+    }
 
     // --- Getters & Setters ---
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+
+    public String getBinCode() { return binCode; }
+    public void setBinCode(String binCode) { this.binCode = binCode; }
 
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }

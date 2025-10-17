@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/officer")
 public class OfficerController {
 
+    // Dependency injection
     private final OfficerService officerService;
 
+    // Constructor
     public OfficerController(OfficerService officerService) {
         this.officerService = officerService;
     }

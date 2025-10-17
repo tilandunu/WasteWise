@@ -11,8 +11,11 @@ import java.util.List;
 @RequestMapping("/api/tags")
 public class TagController {
 
+    // Inject the TagService
     private final TagService tagService;
 
+
+    // Constructor
     public TagController(TagService tagService) {
         this.tagService = tagService;
     }

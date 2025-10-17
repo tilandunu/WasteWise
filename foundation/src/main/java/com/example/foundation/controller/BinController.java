@@ -11,8 +11,10 @@ import java.util.List;
 @RequestMapping("/api/bins")
 public class BinController {
 
+    // Inject the BinService
     private final BinService binService;
 
+    // Constructor
     public BinController(BinService binService) {
         this.binService = binService;
     }
