@@ -15,6 +15,7 @@ public class BinService {
         this.binRepository = binRepository;
     }
 
+    // Get all unassigned bins
     public List<Bin> getUnassignedBins() {
         return binRepository.findAll();
     }

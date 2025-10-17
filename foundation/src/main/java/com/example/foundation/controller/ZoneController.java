@@ -11,8 +11,11 @@ import java.util.List;
 @RequestMapping("/api/zones")
 public class ZoneController {
 
+
+    // Dependency injection
     private final ZoneService zoneService;
 
+    // Constructor
     public ZoneController(ZoneService zoneService) {
         this.zoneService = zoneService;
     }
